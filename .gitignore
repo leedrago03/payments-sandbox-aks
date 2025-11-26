@@ -1,5 +1,8 @@
-# Terraform local directories
+# Terraform
+*.tfstate
+*.tfstate.*
 .terraform/
 .terraform.lock.hcl
-*.tfstate
-*.tfstate.backup
+
+# Sensitive
+*.tfvars
