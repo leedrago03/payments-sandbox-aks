@@ -3,15 +3,20 @@ resource "azurerm_kubernetes_cluster" "aks" {
   location            = var.location
   resource_group_name = var.resource_group_name
   dns_prefix          = "payments-aks"
+  kubernetes_version  = "1.32.9"
 
-default_node_pool {
-  name            = "systemnp"
-  node_count      = var.node_count_system
-  vm_size         = var.node_pool_vm_size
-  vnet_subnet_id  = var.aks_subnet_id
-  type            = "VirtualMachineScaleSets"  # FIX: only valid value!
-  node_labels     = { "nodepool-type" = "system" }
-}
+  default_node_pool {
+    name                = "systemnp"
+    node_count          = var.node_count_system
+    vm_size             = var.system_node_pool_vm_size
+    vnet_subnet_id      = var.aks_subnet_id
+    type                = "VirtualMachineScaleSets"
+    node_labels = {
+      "nodepool-type" = "system"
+      "workload-type" = "infrastructure"
+    }
+    # node_taints removed - not supported in default_node_pool
+  }
 
   identity {
     type = "SystemAssigned"
@@ -21,7 +26,7 @@ default_node_pool {
     network_plugin    = "azure"
     network_policy    = "calico"
     load_balancer_sku = "standard"
-    outbound_type     = "userDefinedRouting"
+    outbound_type     = "loadBalancer"
   }
 
   private_cluster_enabled     = true
@@ -34,11 +39,13 @@ default_node_pool {
 resource "azurerm_kubernetes_cluster_node_pool" "usernp" {
   name                  = "usernp"
   kubernetes_cluster_id = azurerm_kubernetes_cluster.aks.id
-  vm_size               = var.node_pool_vm_size
+  vm_size               = var.user_node_pool_vm_size
   node_count            = var.node_count_user
   mode                  = "User"
   vnet_subnet_id        = var.aks_subnet_id
-  node_labels           = { "nodepool-type" = "user" }
-  tags                  = var.tags
-  orchestrator_version  = "1.28.0"
+  node_labels = {
+    "nodepool-type" = "user"
+    "workload-type" = "application"
+  }
+  tags = var.tags
 }

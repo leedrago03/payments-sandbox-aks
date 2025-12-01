@@ -14,8 +14,14 @@ variable "aks_subnet_id" {
   type = string
 }
 
-variable "node_pool_vm_size" {
-  type = string
+variable "system_node_pool_vm_size" {
+  description = "VM size for system node pool"
+  type        = string
+}
+
+variable "user_node_pool_vm_size" {
+  description = "VM size for user/application node pool"
+  type        = string
 }
 
 variable "node_count_system" {
