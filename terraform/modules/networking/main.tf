@@ -56,6 +56,24 @@ resource "azurerm_subnet" "data" {
   address_prefixes     = ["10.1.3.0/24"]
 }
 
+resource "azurerm_subnet" "postgres" {
+  name                 = "PostgresSubnet"
+  resource_group_name  = var.resource_group_name
+  virtual_network_name = azurerm_virtual_network.spoke.name
+  address_prefixes     = ["10.1.4.0/24"]
+  
+  delegation {
+    name = "postgres-delegation"
+    service_delegation {
+      name = "Microsoft.DBforPostgreSQL/flexibleServers"
+      actions = [
+        "Microsoft.Network/virtualNetworks/subnets/join/action"
+      ]
+    }
+  }
+}
+
+
 resource "azurerm_virtual_network_peering" "hub_to_spoke" {
   name                      = "peer-hub-to-spoke"
   resource_group_name       = var.resource_group_name

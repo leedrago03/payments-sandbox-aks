@@ -13,3 +13,6 @@ output "ingress_subnet_id" {
 output "data_subnet_id" {
   value = azurerm_subnet.data.id
 }
+output "postgres_subnet_id" {
+  value = azurerm_subnet.postgres.id
+}
