@@ -46,5 +46,25 @@ See [docs/00-readme/local-setup.md](docs/00-readme/local-setup.md) for prerequis
 - **Policy:** OPA Gatekeeper
 - **Languages:** Go, React/TypeScript
 
+
+## Development Access (Optional)
+
+For easier cluster management, you can deploy a jumpbox VM:
+
+**When to use:**
+- You need frequent kubectl/helm access
+- Debugging and testing microservices
+- Learning/development environments
+
+**When to skip:**
+- Cost optimization for students
+- You have existing VPN access
+- Using CI/CD pipelines only
+
+**To deploy:**
+cd terraform/envs/dev-tools
+terraform apply
+
+
 ## License
 MIT (for portfolio/learning purposes)

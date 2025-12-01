@@ -16,3 +16,7 @@ output "data_subnet_id" {
 output "postgres_subnet_id" {
   value = azurerm_subnet.postgres.id
 }
+
+output "management_subnet_id" {
+  value = azurerm_subnet.management.id
+}

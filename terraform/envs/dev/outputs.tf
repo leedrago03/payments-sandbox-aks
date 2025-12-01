@@ -13,3 +13,8 @@ output "hub_vnet_id" {
 output "spoke_vnet_id" {
   value = module.networking.spoke_vnet_id
 }
+
+output "management_subnet_id" {
+  value = module.networking.management_subnet_id
+}
+
