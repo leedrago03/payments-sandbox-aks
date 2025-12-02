@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-app
+  namespace: payments-system
+  labels:
+    app: test-app
+spec:
+  ports:
+  - port: 80
+    targetPort: 8080
+    name: http
+  selector:
+    app: test-app
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-app
+  namespace: payments-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: test-app
+  template:
+    metadata:
+      labels:
+        app: test-app
+        version: v1
+    spec:
+      containers:
+      - name: test-app
+        image: hashicorp/http-echo
+        args:
+        - "-text=Hello from Payments Platform with Istio!"
+        - "-listen=:8080"
+        ports:
+        - containerPort: 8080
+      nodeSelector:
+        nodepool-type: user
