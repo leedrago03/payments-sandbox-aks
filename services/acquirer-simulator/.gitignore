@@ -1,0 +1,4 @@
+acquirer-simulator
+*.log
+.DS_Store
+.env

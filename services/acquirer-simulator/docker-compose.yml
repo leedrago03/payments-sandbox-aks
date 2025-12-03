@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  acquirer-simulator:
+    build: .
+    container_name: acquirer-simulator
+    ports:
+      - "3004:3004"
+    environment:
+      - PORT=3004
+      - SUCCESS_RATE=80
+      - TIMEOUT_RATE=5
+    networks:
+      - acquirer-network
+
+networks:
+  acquirer-network:
+    driver: bridge
