@@ -1,0 +1,4 @@
+.env
+tokenization-service
+*.log
+.DS_Store

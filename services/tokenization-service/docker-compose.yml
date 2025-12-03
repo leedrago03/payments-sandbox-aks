@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  tokenization-service:
+    build: .
+    container_name: tokenization-service
+    ports:
+      - "3003:3003"
+    environment:
+      - PORT=3003
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres123
+      - DB_NAME=tokenization
+      - ENCRYPTION_KEY=dev-32-byte-encryption-key-12345
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: on-failure
+    networks:
+      - tokenization-network
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres-tokenization
+    ports:
+      - "5435:5432"
+    environment:
+      - POSTGRES_DB=tokenization
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres123
+    volumes:
+      - postgres-tokenization-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - tokenization-network
+
+volumes:
+  postgres-tokenization-data:
+
+networks:
+  tokenization-network:
+    driver: bridge
