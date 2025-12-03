@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  merchant-service:
+    build: .
+    container_name: merchant-service
+    ports:
+      - "3002:3002"
+    environment:
+      - PORT=3002
+      - ENVIRONMENT=development
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres123
+      - DB_NAME=merchants
+    depends_on:
+      - postgres
+    networks:
+      - merchant-network
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres-merchants
+    ports:
+      - "5434:5432"  # Different port to avoid conflicts
+    environment:
+      - POSTGRES_DB=merchants
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres123
+    volumes:
+      - postgres-merchants-data:/var/lib/postgresql/data
+    networks:
+      - merchant-network
+
+volumes:
+  postgres-merchants-data:
+
+networks:
+  merchant-network:
+    driver: bridge
