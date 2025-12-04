@@ -1,0 +1,4 @@
+audit-service
+*.log
+.DS_Store
+.env

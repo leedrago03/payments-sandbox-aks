@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  audit-service:
+    build: .
+    container_name: audit-service
+    ports:
+      - "3006:3006"
+    environment:
+      - PORT=3006
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres123
+      - DB_NAME=audit
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: on-failure
+    networks:
+      - audit-network
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres-audit
+    ports:
+      - "5437:5432"
+    environment:
+      - POSTGRES_DB=audit
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres123
+    volumes:
+      - postgres-audit-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - audit-network
+
+volumes:
+  postgres-audit-data:
+
+networks:
+  audit-network:
+    driver: bridge
