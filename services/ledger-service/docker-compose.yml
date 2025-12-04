@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  ledger-service:
+    build: .
+    container_name: ledger-service
+    ports:
+      - "3005:3005"
+    environment:
+      - PORT=3005
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres123
+      - DB_NAME=ledger
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: on-failure
+    networks:
+      - ledger-network
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres-ledger
+    ports:
+      - "5436:5432"
+    environment:
+      - POSTGRES_DB=ledger
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres123
+    volumes:
+      - postgres-ledger-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ledger-network
+
+volumes:
+  postgres-ledger-data:
+
+networks:
+  ledger-network:
+    driver: bridge
