@@ -1,0 +1,4 @@
+reconciliation-service
+*.log
+.DS_Store
+.env

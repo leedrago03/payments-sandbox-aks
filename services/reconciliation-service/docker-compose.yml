@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  reconciliation-service:
+    build: .
+    container_name: reconciliation-service
+    ports:
+      - "3007:3007"
+    environment:
+      - PORT=3007
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres123
+      - DB_NAME=reconciliation
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: on-failure
+    networks:
+      - reconciliation-network
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres-reconciliation
+    ports:
+      - "5438:5432"
+    environment:
+      - POSTGRES_DB=reconciliation
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres123
+    volumes:
+      - postgres-reconciliation-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - reconciliation-network
+
+volumes:
+  postgres-reconciliation-data:
+
+networks:
+  reconciliation-network:
+    driver: bridge
