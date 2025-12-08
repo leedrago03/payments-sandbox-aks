@@ -1,10 +1,13 @@
+server:
+  port: 8081
+
 spring:
   application:
     name: payment-service
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:payments}
-    username: ${DB_USER:postgres}
-    password: ${DB_PASSWORD:postgres}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/payments}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:postgres123}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -13,10 +16,17 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: true
 
-server:
-  port: 8080
+# External service URLs
+services:
+  tokenization:
+    url: ${TOKENIZATION_SERVICE_URL:http://localhost:3003}
+  acquirer:
+    url: ${ACQUIRER_SERVICE_URL:http://localhost:3004}
+  ledger:
+    url: ${LEDGER_SERVICE_URL:http://localhost:3005}
+  audit:
+    url: ${AUDIT_SERVICE_URL:http://localhost:3006}
 
 management:
   endpoints:

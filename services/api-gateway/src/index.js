@@ -47,3 +47,7 @@ app.listen(PORT, '0.0.0.0', () => {
 });
 
 module.exports = app;
+
+// Health route
+const healthRoutes = require('./routes/health');
+app.use('/', healthRoutes);

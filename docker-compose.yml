@@ -1,0 +1,275 @@
+version: '3.8'
+
+networks:
+  payments-platform:
+    driver: bridge
+
+volumes:
+  postgres-payments-data:
+  postgres-merchants-data:
+  postgres-tokenization-data:
+  postgres-ledger-data:
+  postgres-audit-data:
+  postgres-reconciliation-data:
+
+services:
+  # ===================
+  # DATABASES
+  # ===================
+  
+  postgres-payments:
+    image: postgres:16-alpine
+    container_name: postgres-payments
+    environment:
+      POSTGRES_DB: payments
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+    volumes:
+      - postgres-payments-data:/var/lib/postgresql/data
+    networks:
+      - payments-platform
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  postgres-merchants:
+    image: postgres:16-alpine
+    container_name: postgres-merchants
+    environment:
+      POSTGRES_DB: merchants
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+    volumes:
+      - postgres-merchants-data:/var/lib/postgresql/data
+    networks:
+      - payments-platform
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  postgres-tokenization:
+    image: postgres:16-alpine
+    container_name: postgres-tokenization
+    environment:
+      POSTGRES_DB: tokenization
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+    volumes:
+      - postgres-tokenization-data:/var/lib/postgresql/data
+    networks:
+      - payments-platform
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  postgres-ledger:
+    image: postgres:16-alpine
+    container_name: postgres-ledger
+    environment:
+      POSTGRES_DB: ledger
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+    volumes:
+      - postgres-ledger-data:/var/lib/postgresql/data
+    networks:
+      - payments-platform
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  postgres-audit:
+    image: postgres:16-alpine
+    container_name: postgres-audit
+    environment:
+      POSTGRES_DB: audit
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+    volumes:
+      - postgres-audit-data:/var/lib/postgresql/data
+    networks:
+      - payments-platform
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  postgres-reconciliation:
+    image: postgres:16-alpine
+    container_name: postgres-reconciliation
+    environment:
+      POSTGRES_DB: reconciliation
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+    volumes:
+      - postgres-reconciliation-data:/var/lib/postgresql/data
+    networks:
+      - payments-platform
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ===================
+  # CORE SERVICES
+  # ===================
+
+  acquirer-simulator:
+    build: ./services/acquirer-simulator
+    container_name: acquirer-simulator
+    ports:
+      - "3004:3004"
+    environment:
+      PORT: 3004
+      SUCCESS_RATE: 80
+      TIMEOUT_RATE: 5
+    networks:
+      - payments-platform
+    restart: unless-stopped
+
+  merchant-service:
+    build: ./services/merchant-service
+    container_name: merchant-service
+    ports:
+      - "3002:3002"
+    environment:
+      PORT: 3002
+      DB_HOST: postgres-merchants
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres123
+      DB_NAME: merchants
+    depends_on:
+      postgres-merchants:
+        condition: service_healthy
+    networks:
+      - payments-platform
+    restart: unless-stopped
+
+  tokenization-service:
+    build: ./services/tokenization-service
+    container_name: tokenization-service
+    ports:
+      - "3003:3003"
+    environment:
+      PORT: 3003
+      DB_HOST: postgres-tokenization
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres123
+      DB_NAME: tokenization
+      ENCRYPTION_KEY: dev-32-byte-encryption-key-12345
+    depends_on:
+      postgres-tokenization:
+        condition: service_healthy
+    networks:
+      - payments-platform
+    restart: unless-stopped
+
+  ledger-service:
+    build: ./services/ledger-service
+    container_name: ledger-service
+    ports:
+      - "3005:3005"
+    environment:
+      PORT: 3005
+      DB_HOST: postgres-ledger
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres123
+      DB_NAME: ledger
+    depends_on:
+      postgres-ledger:
+        condition: service_healthy
+    networks:
+      - payments-platform
+    restart: unless-stopped
+
+  audit-service:
+    build: ./services/audit-service
+    container_name: audit-service
+    ports:
+      - "3006:3006"
+    environment:
+      PORT: 3006
+      DB_HOST: postgres-audit
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres123
+      DB_NAME: audit
+    depends_on:
+      postgres-audit:
+        condition: service_healthy
+    networks:
+      - payments-platform
+    restart: unless-stopped
+
+  reconciliation-service:
+    build: ./services/reconciliation-service
+    container_name: reconciliation-service
+    ports:
+      - "3007:3007"
+    environment:
+      PORT: 3007
+      DB_HOST: postgres-reconciliation
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres123
+      DB_NAME: reconciliation
+    depends_on:
+      postgres-reconciliation:
+        condition: service_healthy
+    networks:
+      - payments-platform
+    restart: unless-stopped
+
+  # ===================
+  # ORCHESTRATION SERVICES
+  # ===================
+
+  payment-service:
+    build: ./services/payment-service
+    container_name: payment-service
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-payments:5432/payments
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres123
+      TOKENIZATION_SERVICE_URL: http://tokenization-service:3003
+      ACQUIRER_SERVICE_URL: http://acquirer-simulator:3004
+      LEDGER_SERVICE_URL: http://ledger-service:3005
+      AUDIT_SERVICE_URL: http://audit-service:3006
+    depends_on:
+      postgres-payments:
+        condition: service_healthy
+    networks:
+      - payments-platform
+    restart: unless-stopped
+
+  api-gateway:
+    build: ./services/api-gateway
+    container_name: api-gateway
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      JWT_SECRET: your-super-secret-jwt-key-change-in-production
+      PAYMENT_SERVICE_URL: http://payment-service:8081
+      MERCHANT_SERVICE_URL: http://merchant-service:3002
+      TOKENIZATION_SERVICE_URL: http://tokenization-service:3003
+    depends_on:
+      - payment-service
+      - merchant-service
+    networks:
+      - payments-platform
+    restart: unless-stopped
