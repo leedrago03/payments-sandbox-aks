@@ -14,3 +14,8 @@ output "kubelet_identity_object_id" {
   description = "Object ID of the kubelet managed identity (for RBAC assignments)"
   value       = azurerm_kubernetes_cluster.aks.kubelet_identity[0].object_id
 }
+
+output "oidc_issuer_url" {
+  description = "AKS OIDC Issuer URL for Workload Identity"
+  value       = azurerm_kubernetes_cluster.aks.oidc_issuer_url
+}
