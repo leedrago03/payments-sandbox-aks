@@ -1,0 +1,102 @@
+{
+  "acquirer_simulator_client_id": {
+    "sensitive": false,
+    "type": "string",
+    "value": "136f36ae-316c-416c-b698-1c6548b28c64"
+  },
+  "acr_login_server": {
+    "sensitive": false,
+    "type": "string",
+    "value": "acrpaymentsdevs0d5ry.azurecr.io"
+  },
+  "aks_cluster_name": {
+    "sensitive": false,
+    "type": "string",
+    "value": "payments-aks-dev"
+  },
+  "aks_oidc_issuer_url": {
+    "sensitive": false,
+    "type": "string",
+    "value": "https://southeastasia.oic.prod-aks.azure.com/b87386c8-9083-4a27-9ddf-63a3dfa33850/4df89e7f-3be8-4ca3-8fa6-9eed3965e076/"
+  },
+  "aks_subnet_id": {
+    "sensitive": false,
+    "type": "string",
+    "value": "/subscriptions/40176992-7349-4178-bb4d-6576e597a45e/resourceGroups/rg-payments-aks/providers/Microsoft.Network/virtualNetworks/vnet-spoke-dev/subnets/AksSubnet"
+  },
+  "api_gateway_client_id": {
+    "sensitive": false,
+    "type": "string",
+    "value": "357c9c80-e0e5-4d91-805e-cc329dee4565"
+  },
+  "audit_service_client_id": {
+    "sensitive": false,
+    "type": "string",
+    "value": "5100ccb4-32d9-4f57-bd88-50e8cd17c4c2"
+  },
+  "eventhubs_namespace_fqdn": {
+    "sensitive": false,
+    "type": "string",
+    "value": "ehns-payments-dev.servicebus.windows.net"
+  },
+  "eventhubs_payment_events_name": {
+    "sensitive": false,
+    "type": "string",
+    "value": "payment-events"
+  },
+  "keyvault_uri": {
+    "sensitive": false,
+    "type": "string",
+    "value": "https://kv-payments-s0d5ry.vault.azure.net/"
+  },
+  "ledger_service_client_id": {
+    "sensitive": false,
+    "type": "string",
+    "value": "8fd2d139-08a9-4a76-ad5c-f7700f9fdb58"
+  },
+  "merchant_service_client_id": {
+    "sensitive": false,
+    "type": "string",
+    "value": "16777be4-90f9-42f2-b868-c7ce963b3655"
+  },
+  "payment_service_client_id": {
+    "sensitive": false,
+    "type": "string",
+    "value": "43cb324c-c3e4-4d00-9f7a-66a2e46e59e3"
+  },
+  "postgresql_database_name": {
+    "sensitive": false,
+    "type": "string",
+    "value": "payments"
+  },
+  "postgresql_fqdn": {
+    "sensitive": false,
+    "type": "string",
+    "value": "psql-payments-s0d5ry.postgres.database.azure.com"
+  },
+  "postgresql_server_id": {
+    "sensitive": false,
+    "type": "string",
+    "value": "/subscriptions/40176992-7349-4178-bb4d-6576e597a45e/resourceGroups/rg-payments-aks/providers/Microsoft.DBforPostgreSQL/flexibleServers/psql-payments-s0d5ry"
+  },
+  "reconciliation_service_client_id": {
+    "sensitive": false,
+    "type": "string",
+    "value": "ac4f14a5-c3b9-4af1-854d-31dbb372c4db"
+  },
+  "redis_hostname": {
+    "sensitive": false,
+    "type": "string",
+    "value": "redis-payments-s0d5ry.redis.cache.windows.net"
+  },
+  "spoke_vnet_id": {
+    "sensitive": false,
+    "type": "string",
+    "value": "/subscriptions/40176992-7349-4178-bb4d-6576e597a45e/resourceGroups/rg-payments-aks/providers/Microsoft.Network/virtualNetworks/vnet-spoke-dev"
+  },
+  "tokenization_service_client_id": {
+    "sensitive": false,
+    "type": "string",
+    "value": "9a7e39e3-c8bd-4a1d-a364-af22f6ca600e"
+  }
+}

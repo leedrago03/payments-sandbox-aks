@@ -10,7 +10,3 @@ output "keyvault_name" {
   value = azurerm_key_vault.kv.name
 }
 
-output "keyvault_id" {
-  description = "Key Vault Resource ID"
-  value       = azurerm_key_vault.kv.id
-}

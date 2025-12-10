@@ -38,9 +38,14 @@ output "postgresql_fqdn" {
   value       = module.postgresql.postgresql_fqdn
 }
 
-output "postgresql_server_name" {
-  description = "PostgreSQL Server Name"
-  value       = module.postgresql.postgresql_server_name
+output "postgresql_server_id" {
+  description = "PostgreSQL Server ID"
+  value       = module.postgresql.postgresql_server_id
+}
+
+output "postgresql_database_name" {
+  description = "PostgreSQL Database Name"
+  value       = module.postgresql.postgresql_database_name
 }
 
 # Redis Outputs

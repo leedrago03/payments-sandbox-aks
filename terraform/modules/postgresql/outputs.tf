@@ -1,11 +1,14 @@
 output "postgresql_server_id" {
-  value = azurerm_postgresql_flexible_server.postgres.id
+  description = "PostgreSQL Server ID"
+  value       = azurerm_postgresql_flexible_server.postgres.id
 }
 
 output "postgresql_fqdn" {
-  value = azurerm_postgresql_flexible_server.postgres.fqdn
+  description = "PostgreSQL Server FQDN"
+  value       = azurerm_postgresql_flexible_server.postgres.fqdn
 }
 
 output "postgresql_database_name" {
-  value = azurerm_postgresql_flexible_server_database.payments_db.name
+  description = "PostgreSQL Database Name"
+  value       = azurerm_postgresql_flexible_server_database.payments_db.name
 }
