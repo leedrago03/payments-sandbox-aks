@@ -1,0 +1,99 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-service
+  namespace: payments-system
+  labels:
+    app: payment-service
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: payment-service
+  template:
+    metadata:
+      labels:
+        app: payment-service
+        version: v1
+      annotations:
+        sidecar.istio.io/inject: "true"
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8081"
+        prometheus.io/path: "/actuator/prometheus"
+    spec:
+      serviceAccountName: payment-service
+      nodeSelector:
+        workload-type: application
+      containers:
+      - name: payment-service
+        image: acrpaymentsdevs0d5ry.azurecr.io/payment-service:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8081
+          name: http
+          protocol: TCP
+        envFrom:
+        - configMapRef:
+            name: payment-service-config
+        env:
+        - name: SPRING_DATASOURCE_URL
+          value: "jdbc:postgresql://$(POSTGRES_HOST):$(POSTGRES_PORT)/payments?sslmode=$(POSTGRES_SSLMODE)"
+        - name: SPRING_DATASOURCE_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: postgresql-credentials
+              key: username
+        - name: SPRING_DATASOURCE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgresql-credentials
+              key: password
+        - name: POSTGRES_HOST
+          valueFrom:
+            secretKeyRef:
+              name: postgresql-credentials
+              key: host
+        - name: POSTGRES_PORT
+          valueFrom:
+            secretKeyRef:
+              name: postgresql-credentials
+              key: port
+        - name: POSTGRES_SSLMODE
+          valueFrom:
+            secretKeyRef:
+              name: postgresql-credentials
+              key: sslmode
+        - name: AZURE_CLIENT_ID
+          value: "43cb324c-c3e4-4d00-9f7a-66a2e46e59e3"
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8081
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 8081
+          initialDelaySeconds: 30
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1001
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false
+          capabilities:
+            drop:
+            - ALL

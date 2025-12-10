@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: payment-service-config
+  namespace: payments-system
+data:
+  TOKENIZATION_SERVICE_URL: "http://tokenization-service.payments-system.svc.cluster.local:3003"
+  ACQUIRER_SERVICE_URL: "http://acquirer-simulator.payments-system.svc.cluster.local:3004"
+  LEDGER_SERVICE_URL: "http://ledger-service.payments-data.svc.cluster.local:3005"
+  AUDIT_SERVICE_URL: "http://audit-service.payments-data.svc.cluster.local:3006"
+  EVENTHUB_NAMESPACE: "ehns-payments-dev.servicebus.windows.net"
+  EVENTHUB_NAME: "payment-events"

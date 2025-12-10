@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-gateway-config
+  namespace: payments-system
+data:
+  PORT: "3000"
+  NODE_ENV: "production"
+  LOG_LEVEL: "info"
+  PAYMENT_SERVICE_URL: "http://payment-service.payments-system.svc.cluster.local:8081"
+  MERCHANT_SERVICE_URL: "http://merchant-service.payments-system.svc.cluster.local:3002"
+  TOKENIZATION_SERVICE_URL: "http://tokenization-service.payments-system.svc.cluster.local:3003"
+  REDIS_HOST: "redis-payments-s0d5ry.redis.cache.windows.net"
+  REDIS_PORT: "6380"
+  REDIS_TLS_ENABLED: "true"
