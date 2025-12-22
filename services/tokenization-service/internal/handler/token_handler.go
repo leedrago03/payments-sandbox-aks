@@ -15,6 +15,14 @@ func NewTokenHandler(service *service.TokenService) *TokenHandler {
     return &TokenHandler{service: service}
 }
 
+func (h *TokenHandler) RegisterRoutes(app *fiber.App) {
+	v1 := app.Group("/v1")
+	v1.Post("/tokenize", h.Tokenize)
+	v1.Get("/tokens/:token", h.GetToken)
+	v1.Get("/detokenize/:token", h.Detokenize) // Should be admin only
+}
+
+
 func (h *TokenHandler) Tokenize(c *fiber.Ctx) error {
     var req model.TokenizeRequest
     if err := c.BodyParser(&req); err != nil {

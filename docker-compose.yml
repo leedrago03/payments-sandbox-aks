@@ -162,6 +162,7 @@ services:
       - "3003:3003"
     environment:
       PORT: 3003
+      # Using SQLite for now as per implementation, but keeping DB envs for future refactor
       DB_HOST: postgres-tokenization
       DB_PORT: 5432
       DB_USER: postgres
@@ -242,13 +243,14 @@ services:
     ports:
       - "8081:8081"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-payments:5432/payments
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres123
+      PORT: 8081
       TOKENIZATION_SERVICE_URL: http://tokenization-service:3003
-      ACQUIRER_SERVICE_URL: http://acquirer-simulator:3004
-      LEDGER_SERVICE_URL: http://ledger-service:3005
-      AUDIT_SERVICE_URL: http://audit-service:3006
+      # Postgres config for future use
+      DB_HOST: postgres-payments
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres123
+      DB_NAME: payments
     depends_on:
       postgres-payments:
         condition: service_healthy
@@ -260,9 +262,9 @@ services:
     build: ./services/api-gateway
     container_name: api-gateway
     ports:
-      - "3000:3000"
+      - "8000:8000"
     environment:
-      PORT: 3000
+      PORT: 8000
       JWT_SECRET: your-super-secret-jwt-key-change-in-production
       PAYMENT_SERVICE_URL: http://payment-service:8081
       MERCHANT_SERVICE_URL: http://merchant-service:3002

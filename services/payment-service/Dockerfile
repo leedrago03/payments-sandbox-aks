@@ -1,29 +1,14 @@
-FROM maven:3.9-eclipse-temurin-21-alpine AS builder
-
+FROM golang:1.24-alpine AS builder
 WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+RUN CGO_ENABLED=0 GOOS=linux go build -o payment-service ./cmd/server
 
-# Copy pom.xml and download dependencies
-COPY pom.xml .
-RUN mvn dependency:go-offline -B
-
-# Copy source and build
-COPY src ./src
-RUN mvn clean package -DskipTests
-
-# Runtime stage
-FROM eclipse-temurin:21-jre-alpine
-
+FROM alpine:latest
 WORKDIR /app
-
-# Copy jar from builder
-COPY --from=builder /app/target/*.jar app.jar
-
-# Create non-root user
-RUN addgroup -g 1001 -S spring && \
-    adduser -S spring -u 1001
-
-USER spring
-
+COPY --from=builder /app/payment-service .
+RUN addgroup -g 1001 -S appuser && adduser -S appuser -u 1001
+USER appuser
 EXPOSE 8080
-
-ENTRYPOINT ["java", "-jar", "app.jar"]
+CMD ["./payment-service"]

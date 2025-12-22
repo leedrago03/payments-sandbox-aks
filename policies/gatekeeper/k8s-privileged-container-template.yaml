@@ -1,0 +1,23 @@
+apiVersion: templates.gatekeeper.sh/v1
+kind: ConstraintTemplate
+metadata:
+  name: k8spspforbiddprivileged
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sPSPForbiddPrivileged
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8spspprivileged
+
+        violation[{"msg": msg}] {
+            input.review.object.spec.containers[_].securityContext.privileged
+            msg := "Privileged container is not allowed"
+        }
+
+        violation[{"msg": msg}] {
+            input.review.object.spec.initContainers[_].securityContext.privileged
+            msg := "Privileged init container is not allowed"
+        }

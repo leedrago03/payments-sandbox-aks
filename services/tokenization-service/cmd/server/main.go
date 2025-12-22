@@ -1,61 +1,79 @@
 package main
 
 import (
-    "fmt"
-    "log"
-    "tokenization-service/config"
-    "tokenization-service/internal/crypto"
-    "tokenization-service/internal/handler"
-    "tokenization-service/internal/repository"
-    "tokenization-service/internal/service"
-    "tokenization-service/pkg/database"
-    
-    "github.com/gofiber/fiber/v2"
-    "github.com/gofiber/fiber/v2/middleware/cors"
-    "github.com/gofiber/fiber/v2/middleware/logger"
-    "github.com/gofiber/fiber/v2/middleware/recover"
+	"database/sql"
+	"log"
+	"os"
+
+	"github.com/gofiber/fiber/v2"
+	_ "modernc.org/sqlite"
+
+	"tokenization-service/internal/crypto"
+	"tokenization-service/internal/handler"
+	"tokenization-service/internal/repository"
+	"tokenization-service/internal/service"
 )
 
 func main() {
-    cfg, err := config.Load()
-    if err != nil {
-        log.Fatalf("Failed to load config: %v", err)
-    }
-    
-    connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-        cfg.DBHost, cfg.DBPort, cfg.DBUser, cfg.DBPassword, cfg.DBName)
-    
-    db, err := database.InitDB(connStr)
-    if err != nil {
-        log.Fatalf("Failed to initialize database: %v", err)
-    }
-    defer db.Close()
-    
-    encryptor := crypto.NewEncryptor(cfg.EncryptionKey)
-    tokenRepo := repository.NewTokenRepository(db)
-    tokenService := service.NewTokenService(tokenRepo, encryptor)
-    tokenHandler := handler.NewTokenHandler(tokenService)
-    healthHandler := handler.NewHealthHandler(db)
-    
-    app := fiber.New(fiber.Config{
-        AppName: "Tokenization Service v1.0",
-    })
-    
-    app.Use(recover.New())
-    app.Use(logger.New())
-    app.Use(cors.New())
-    
-    health := app.Group("/health")
-    health.Get("/liveness", healthHandler.Liveness)
-    health.Get("/readiness", healthHandler.Readiness)
-    
-    api := app.Group("/api/tokens")
-    api.Post("/", tokenHandler.Tokenize)
-    api.Get("/:token", tokenHandler.GetToken)
-    api.Post("/:token/detokenize", tokenHandler.Detokenize)
-    
-    log.Printf("Tokenization Service starting on port %s", cfg.ServerPort)
-    if err := app.Listen("0.0.0.0:" + cfg.ServerPort); err != nil {
-        log.Fatalf("Failed to start server: %v", err)
-    }
+	// Get config from environment variables
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	keyVaultURI := os.Getenv("AZURE_KEY_VAULT_URI")
+	keyName := os.Getenv("AZURE_KEY_NAME")
+
+	// Initialize database
+	db, err := sql.Open("sqlite", "./tokens.db")
+	if err != nil {
+		log.Fatalf("failed to open database: %v", err)
+	}
+	defer db.Close()
+
+	// Create schema
+	_, err = db.Exec(`
+		CREATE TABLE IF NOT EXISTS tokens (
+			id TEXT PRIMARY KEY,
+			token TEXT NOT NULL,
+			encrypted_pan BLOB NOT NULL,
+			last4 TEXT NOT NULL,
+			brand TEXT NOT NULL,
+			expiry_month INTEGER NOT NULL,
+			expiry_year INTEGER NOT NULL,
+			merchant_id TEXT NOT NULL,
+			created_at DATETIME NOT NULL
+		);
+	`)
+	if err != nil {
+		log.Fatalf("failed to create schema: %v", err)
+	}
+
+
+	// Initialize crypto service
+	encryptor, err := crypto.NewEncryptor(keyVaultURI, keyName)
+	if err != nil {
+		log.Fatalf("failed to create encryptor: %v", err)
+	}
+
+	// Initialize repository
+	repo := repository.NewTokenRepository(db)
+
+	// Initialize service
+	tokenService := service.NewTokenService(repo, encryptor)
+
+	// Initialize handler
+	tokenHandler := handler.NewTokenHandler(tokenService)
+
+	// Create Fiber app
+	app := fiber.New()
+
+	// Register routes
+	tokenHandler.RegisterRoutes(app)
+
+	// Start server
+	log.Printf("Server listening on port %s", port)
+	if err := app.Listen(":" + port); err != nil {
+		log.Fatalf("failed to start server: %v", err)
+	}
 }
