@@ -18,22 +18,27 @@ func (r *AuditRepository) Create(log *model.AuditLog) error {
     query := `
         INSERT INTO audit_logs (id, event_type, entity_type, entity_id, actor_type, 
                                actor_id, action, details, ip_address, user_agent, 
-                               success, error_msg, created_at)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+                               success, error_msg, signature, created_at)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
     `
     
     _, err := r.db.Exec(query, log.ID, log.EventType, log.EntityType, log.EntityID,
         log.ActorType, log.ActorID, log.Action, log.Details, log.IPAddress,
-        log.UserAgent, log.Success, log.ErrorMsg, log.CreatedAt)
+        log.UserAgent, log.Success, log.ErrorMsg, log.Signature, log.CreatedAt)
     
     return err
 }
 
 func (r *AuditRepository) Query(params *model.AuditLogQueryParams) ([]model.AuditLog, error) {
-    query := "SELECT * FROM audit_logs WHERE 1=1"
+    query := `
+        SELECT id, event_type, entity_type, entity_id, actor_type, 
+               actor_id, action, details, ip_address, user_agent, 
+               success, error_msg, signature, created_at 
+        FROM audit_logs WHERE 1=1`
     args := []interface{}{}
     argCount := 1
     
+    // ... existing filtering logic ...
     if params.EntityType != "" {
         query += fmt.Sprintf(" AND entity_type = $%d", argCount)
         args = append(args, params.EntityType)
@@ -90,7 +95,8 @@ func (r *AuditRepository) Query(params *model.AuditLogQueryParams) ([]model.Audi
         var log model.AuditLog
         err := rows.Scan(&log.ID, &log.EventType, &log.EntityType, &log.EntityID,
             &log.ActorType, &log.ActorID, &log.Action, &log.Details,
-            &log.IPAddress, &log.UserAgent, &log.Success, &log.ErrorMsg, &log.CreatedAt)
+            &log.IPAddress, &log.UserAgent, &log.Success, &log.ErrorMsg, 
+            &log.Signature, &log.CreatedAt)
         if err != nil {
             return nil, err
         }
@@ -102,7 +108,10 @@ func (r *AuditRepository) Query(params *model.AuditLogQueryParams) ([]model.Audi
 
 func (r *AuditRepository) GetByEntityID(entityID string, limit int) ([]model.AuditLog, error) {
     query := `
-        SELECT * FROM audit_logs 
+        SELECT id, event_type, entity_type, entity_id, actor_type, 
+               actor_id, action, details, ip_address, user_agent, 
+               success, error_msg, signature, created_at 
+        FROM audit_logs 
         WHERE entity_id = $1 
         ORDER BY created_at DESC 
         LIMIT $2
@@ -119,7 +128,8 @@ func (r *AuditRepository) GetByEntityID(entityID string, limit int) ([]model.Aud
         var log model.AuditLog
         err := rows.Scan(&log.ID, &log.EventType, &log.EntityType, &log.EntityID,
             &log.ActorType, &log.ActorID, &log.Action, &log.Details,
-            &log.IPAddress, &log.UserAgent, &log.Success, &log.ErrorMsg, &log.CreatedAt)
+            &log.IPAddress, &log.UserAgent, &log.Success, &log.ErrorMsg, 
+            &log.Signature, &log.CreatedAt)
         if err != nil {
             return nil, err
         }
@@ -128,6 +138,7 @@ func (r *AuditRepository) GetByEntityID(entityID string, limit int) ([]model.Aud
     
     return logs, nil
 }
+
 
 func (r *AuditRepository) GetStats() (map[string]int, error) {
     query := `

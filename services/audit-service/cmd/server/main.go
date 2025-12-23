@@ -2,17 +2,21 @@ package main
 
 import (
     "audit-service/config"
+    "audit-service/internal/consumer"
     "audit-service/internal/handler"
     "audit-service/internal/repository"
     "audit-service/internal/service"
     "audit-service/pkg/database"
+    "context"
     "fmt"
     "log"
+    "os"
     
     "github.com/gofiber/fiber/v2"
     "github.com/gofiber/fiber/v2/middleware/cors"
     "github.com/gofiber/fiber/v2/middleware/logger"
     "github.com/gofiber/fiber/v2/middleware/recover"
+    "github.com/payments-sandbox/pkg/events"
 )
 
 func main() {
@@ -30,10 +34,25 @@ func main() {
     }
     defer db.Close()
     
+    // Initialize Event Bus
+    var eventBus events.EventBus
+    if redisAddr := os.Getenv("REDIS_ADDR"); redisAddr != "" {
+        eventBus = events.NewRedisBus(redisAddr, "", 0)
+        log.Printf("Using Redis Event Bus at %s", redisAddr)
+    } else {
+        eventBus = events.NewMemoryBus()
+        log.Println("Using In-Memory Event Bus")
+    }
+    defer eventBus.Close()
+
     auditRepo := repository.NewAuditRepository(db)
-    auditService := service.NewAuditService(auditRepo)
+    auditService := service.NewAuditService(auditRepo, cfg.HMACKey)
     auditHandler := handler.NewAuditHandler(auditService)
     healthHandler := handler.NewHealthHandler(db)
+    
+    // Start Consumer
+    auditConsumer := consumer.NewAuditConsumer(auditService, eventBus)
+    auditConsumer.Start(context.Background())
     
     app := fiber.New(fiber.Config{
         AppName: "Audit Service v1.0",

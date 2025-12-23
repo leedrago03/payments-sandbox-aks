@@ -12,6 +12,7 @@ type Config struct {
     DBUser     string
     DBPassword string
     DBName     string
+    HMACKey    string
 }
 
 func Load() (*Config, error) {
@@ -24,6 +25,7 @@ func Load() (*Config, error) {
         DBUser:     getEnv("DB_USER", "postgres"),
         DBPassword: getEnv("DB_PASSWORD", "postgres123"),
         DBName:     getEnv("DB_NAME", "audit"),
+        HMACKey:    getEnv("AUDIT_HMAC_KEY", "default-audit-key-change-me"),
     }, nil
 }
 

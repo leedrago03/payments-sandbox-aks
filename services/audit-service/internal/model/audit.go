@@ -48,6 +48,7 @@ type AuditLog struct {
     UserAgent   string            `json:"user_agent" db:"user_agent"`
     Success     bool              `json:"success" db:"success"`
     ErrorMsg    string            `json:"error_msg,omitempty" db:"error_msg"`
+    Signature   string            `json:"signature" db:"signature"`
     CreatedAt   time.Time         `json:"created_at" db:"created_at"`
 }
 

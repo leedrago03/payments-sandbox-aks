@@ -2,17 +2,18 @@ package handler
 
 import (
 	"payment-service/internal/model"
+	"payment-service/internal/service"
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
-	"time"
 )
 
 type PaymentHandler struct {
-	// In a real scenario, we'd inject the service here
+	service *service.PaymentService
 }
 
-func NewPaymentHandler() *PaymentHandler {
-	return &PaymentHandler{}
+func NewPaymentHandler(svc *service.PaymentService) *PaymentHandler {
+	return &PaymentHandler{
+		service: svc,
+	}
 }
 
 func (h *PaymentHandler) RegisterRoutes(app *fiber.App) {
@@ -28,17 +29,9 @@ func (h *PaymentHandler) AuthorizePayment(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request"})
 	}
 
-	// Mock logic for now
-	payment := model.Payment{
-		ID:             uuid.New().String(),
-		MerchantID:     req.MerchantID,
-		Amount:         req.Amount,
-		Currency:       req.Currency,
-		Token:          req.Token,
-		Status:         model.StatusAuthorized,
-		IdempotencyKey: req.IdempotencyKey,
-		CreatedAt:      time.Now(),
-		UpdatedAt:      time.Now(),
+	payment, err := h.service.Authorize(c.Context(), &req)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(payment)

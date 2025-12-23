@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"tokenization-service/internal/crypto"
+	"github.com/payments-sandbox/pkg/crypto"
 	"tokenization-service/internal/model"
 	"tokenization-service/internal/repository"
 )

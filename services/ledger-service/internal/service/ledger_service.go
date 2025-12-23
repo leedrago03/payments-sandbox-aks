@@ -53,9 +53,19 @@ func (s *LedgerService) CreateEntries(req *model.CreateEntriesRequest) (*model.C
 }
 
 func (s *LedgerService) validateDoubleEntry(entries []model.EntryRequest) bool {
+    if len(entries) < 2 {
+        return false
+    }
+
     var totalDebits, totalCredits float64
+    baseCurrency := entries[0].Currency
     
     for _, entry := range entries {
+        // All entries in a transaction must be in the same currency
+        if entry.Currency != baseCurrency {
+            return false
+        }
+
         if entry.EntryType == model.DEBIT {
             totalDebits += entry.Amount
         } else {
@@ -63,9 +73,12 @@ func (s *LedgerService) validateDoubleEntry(entries []model.EntryRequest) bool {
         }
     }
     
-    // Allow 0.01 difference for floating point precision
+    // Allow 0.0001 difference for floating point precision
     diff := totalDebits - totalCredits
-    return diff >= -0.01 && diff <= 0.01
+    if diff < 0 {
+        diff = -diff
+    }
+    return diff <= 0.0001
 }
 
 func (s *LedgerService) GetPaymentEntries(paymentID string) ([]model.LedgerEntry, error) {

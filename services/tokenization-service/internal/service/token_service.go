@@ -5,7 +5,7 @@ import (
     "encoding/base64"
     "errors"
     "strings"
-    "tokenization-service/internal/crypto"
+    "github.com/payments-sandbox/pkg/crypto"
     "tokenization-service/internal/model"
     "tokenization-service/internal/repository"
 )

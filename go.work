@@ -1,0 +1,13 @@
+go 1.24.11
+
+use (
+	./pkg
+	./services/tokenization-service
+    ./services/payment-service
+    ./services/audit-service
+    ./services/ledger-service
+    ./services/api-gateway
+    ./services/acquirer-simulator
+    ./services/reconciliation-service
+    ./services/merchant-service
+)

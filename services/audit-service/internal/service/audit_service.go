@@ -3,17 +3,23 @@ package service
 import (
     "audit-service/internal/model"
     "audit-service/internal/repository"
+    "fmt"
     "time"
     
     "github.com/google/uuid"
+    "github.com/payments-sandbox/pkg/crypto"
 )
 
 type AuditService struct {
     repo *repository.AuditRepository
+    hmacKey []byte
 }
 
-func NewAuditService(repo *repository.AuditRepository) *AuditService {
-    return &AuditService{repo: repo}
+func NewAuditService(repo *repository.AuditRepository, hmacKey string) *AuditService {
+    return &AuditService{
+        repo: repo,
+        hmacKey: []byte(hmacKey),
+    }
 }
 
 func (s *AuditService) LogEvent(req *model.CreateAuditLogRequest) (*model.AuditLog, error) {
@@ -33,11 +39,32 @@ func (s *AuditService) LogEvent(req *model.CreateAuditLogRequest) (*model.AuditL
         CreatedAt:  time.Now(),
     }
     
+    // Calculate signature for immutability
+    log.Signature = s.calculateSignature(log)
+    
     if err := s.repo.Create(log); err != nil {
         return nil, err
     }
     
     return log, nil
+}
+
+func (s *AuditService) calculateSignature(log *model.AuditLog) string {
+    // Concatenate key fields to create a message for signing
+    // Using a stable format (CSV-like) for the signature base
+    message := fmt.Sprintf("%s|%s|%s|%s|%s|%s|%t|%s|%s",
+        log.ID,
+        log.EventType,
+        log.EntityID,
+        log.ActorID,
+        log.Action,
+        log.Details,
+        log.Success,
+        log.ErrorMsg,
+        log.CreatedAt.Format(time.RFC3339),
+    )
+    
+    return crypto.GenerateHMAC([]byte(message), s.hmacKey)
 }
 
 func (s *AuditService) QueryLogs(params *model.AuditLogQueryParams) ([]model.AuditLog, error) {

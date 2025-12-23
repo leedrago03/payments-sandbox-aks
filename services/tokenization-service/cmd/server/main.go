@@ -8,7 +8,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	_ "modernc.org/sqlite"
 
-	"tokenization-service/internal/crypto"
+	"github.com/payments-sandbox/pkg/crypto"
 	"tokenization-service/internal/handler"
 	"tokenization-service/internal/repository"
 	"tokenization-service/internal/service"

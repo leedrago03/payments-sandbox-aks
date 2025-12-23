@@ -1,6 +1,6 @@
 module merchant-service
 
-go 1.21
+go 1.24.11
 
 require (
 	github.com/gofiber/fiber/v2 v2.52.0

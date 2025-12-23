@@ -42,6 +42,7 @@ func createTables(db *sql.DB) error {
         user_agent TEXT,
         success BOOLEAN DEFAULT TRUE,
         error_msg TEXT,
+        signature TEXT,
         created_at TIMESTAMP NOT NULL DEFAULT NOW()
     );
 

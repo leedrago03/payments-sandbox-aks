@@ -3,7 +3,7 @@ package crypto
 import (
 	"context"
 	"fmt"
-	"tokenization-service/internal/crypto/kms"
+	"github.com/payments-sandbox/pkg/crypto/kms"
 )
 
 // Encryptor handles encryption and decryption of data.

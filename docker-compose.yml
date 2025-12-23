@@ -120,6 +120,23 @@ services:
       retries: 5
 
   # ===================
+  # MESSAGE BROKER
+  # ===================
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - payments-platform
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ===================
   # CORE SERVICES
   # ===================
 
@@ -156,7 +173,9 @@ services:
     restart: unless-stopped
 
   tokenization-service:
-    build: ./services/tokenization-service
+    build:
+      context: .
+      dockerfile: services/tokenization-service/Dockerfile
     container_name: tokenization-service
     ports:
       - "3003:3003"
@@ -188,6 +207,7 @@ services:
       DB_USER: postgres
       DB_PASSWORD: postgres123
       DB_NAME: ledger
+      REDIS_ADDR: redis:6379
     depends_on:
       postgres-ledger:
         condition: service_healthy
@@ -207,6 +227,7 @@ services:
       DB_USER: postgres
       DB_PASSWORD: postgres123
       DB_NAME: audit
+      REDIS_ADDR: redis:6379
     depends_on:
       postgres-audit:
         condition: service_healthy
@@ -245,6 +266,8 @@ services:
     environment:
       PORT: 8081
       TOKENIZATION_SERVICE_URL: http://tokenization-service:3003
+      ACQUIRER_SERVICE_URL: http://acquirer-simulator:3004
+      REDIS_ADDR: redis:6379
       # Postgres config for future use
       DB_HOST: postgres-payments
       DB_PORT: 5432
