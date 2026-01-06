@@ -54,6 +54,12 @@ output "redis_hostname" {
   value       = module.redis.redis_hostname
 }
 
+output "redis_primary_access_key" {
+  description = "Redis Primary Access Key"
+  value       = module.redis.redis_primary_access_key
+  sensitive   = true
+}
+
 # Event Hubs Outputs (NEW)
 output "eventhubs_namespace_fqdn" {
   description = "Event Hubs Namespace FQDN"

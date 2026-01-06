@@ -2,7 +2,8 @@ package service
 
 import (
 	"context"
-	"fmt"
+	"encoding/json"
+	"errors"
 	"payment-service/internal/integration"
 	"payment-service/internal/model"
 	"time"
@@ -10,6 +11,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/payments-sandbox/pkg/events"
 	"github.com/payments-sandbox/pkg/resilience"
+	"github.com/redis/go-redis/v9"
 	"github.com/sony/gobreaker"
 	"go.uber.org/zap"
 )
@@ -20,9 +22,10 @@ type PaymentService struct {
 	eventBus       events.EventBus
 	breaker        *gobreaker.CircuitBreaker
 	logger         *zap.Logger
+	redisClient    *redis.Client
 }
 
-func NewPaymentService(tokenClient *integration.TokenizationClient, acquirerClient *integration.AcquirerClient, eventBus events.EventBus, logger *zap.Logger) *PaymentService {
+func NewPaymentService(tokenClient *integration.TokenizationClient, acquirerClient *integration.AcquirerClient, eventBus events.EventBus, logger *zap.Logger, redisClient *redis.Client) *PaymentService {
 	cb := resilience.NewCircuitBreaker(resilience.BreakerConfig{
 		Name:      "acquirer-breaker",
 		Threshold: 3, // Fail after 3 consecutive errors
@@ -35,10 +38,46 @@ func NewPaymentService(tokenClient *integration.TokenizationClient, acquirerClie
 		eventBus:       eventBus,
 		breaker:        cb,
 		logger:         logger,
+		redisClient:    redisClient,
 	}
 }
 
 func (s *PaymentService) Authorize(ctx context.Context, req *model.CreatePaymentRequest) (*model.Payment, error) {
+	// 0. Idempotency Check
+	idempotencyKey := req.IdempotencyKey
+	if idempotencyKey != "" {
+		key := "idempotency:" + idempotencyKey
+		val, err := s.redisClient.Get(ctx, key).Result()
+		if err == nil {
+			if val == "PROCESSING" {
+				return nil, errors.New("request already in progress")
+			}
+			// Return cached response
+			var cachedPayment model.Payment
+			if err := json.Unmarshal([]byte(val), &cachedPayment); err == nil {
+				s.logger.Info("Idempotency hit", zap.String("key", idempotencyKey))
+				return &cachedPayment, nil
+			}
+		} else if err != redis.Nil {
+			s.logger.Error("Redis error checking idempotency", zap.Error(err))
+			// Fail open or closed? Closed for safety in payments.
+			return nil, errors.New("internal system error")
+		}
+
+		// Lock
+		success, err := s.redisClient.SetNX(ctx, key, "PROCESSING", 5*time.Minute).Result()
+		if err != nil {
+			return nil, err
+		}
+		if !success {
+			return nil, errors.New("request already in progress")
+		}
+		
+		// Ensure we clear processing state if we crash/panic (though strict consistency might prefer letting it timeout)
+		// Defer clearing is tricky because we want to overwrite with success. 
+		// We'll handle overwrite at the end.
+	}
+
 	// 1. Tokenize if PAN is provided (mocking this flow for now if token already exists)
 	var token string
 	if req.Token != "" {
@@ -103,7 +142,19 @@ func (s *PaymentService) Authorize(ctx context.Context, req *model.CreatePayment
 		event, _ = events.NewEvent("payment.failed", "payment-service", payment)
 	}
 	
-	s.eventBus.Publish(ctx, *event)
+	if err := s.eventBus.Publish(ctx, *event); err != nil {
+		s.logger.Error("Failed to publish event to bus", 
+			zap.Error(err), 
+			zap.String("event_type", event.Type))
+	} else {
+		s.logger.Info("Event published successfully", zap.String("event_id", event.ID))
+	}
+
+	// 5. Save Idempotency Result
+	if idempotencyKey != "" {
+		jsonPayment, _ := json.Marshal(payment)
+		s.redisClient.Set(ctx, "idempotency:"+idempotencyKey, jsonPayment, 24*time.Hour)
+	}
 
 	if status == model.StatusFailed {
 		if err != nil {

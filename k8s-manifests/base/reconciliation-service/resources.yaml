@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reconciliation-service
+  namespace: payments-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: reconciliation-service
+  template:
+    metadata:
+      labels:
+        app: reconciliation-service
+    spec:
+      serviceAccountName: reconciliation-service
+      containers:
+      - name: reconciliation-service
+        image: reconciliation-service
+        ports:
+        - containerPort: 3007
+        livenessProbe:
+          httpGet:
+            path: /health/liveness
+            port: 3007
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health/readiness
+            port: 3007
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        envFrom:
+        - configMapRef:
+            name: reconciliation-service-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: reconciliation-service
+  namespace: payments-system
+spec:
+  selector:
+    app: reconciliation-service
+  ports:
+  - port: 3007
+    targetPort: 3007
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: reconciliation-service-config
+  namespace: payments-system
+data:
+  PORT: "3007"
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: reconciliation-service
+  namespace: payments-system

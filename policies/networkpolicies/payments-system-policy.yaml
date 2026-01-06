@@ -1,0 +1,45 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-external
+  namespace: payments-system
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress
+  # Allow all traffic WITHIN the namespace (Service to Service)
+  ingress:
+  - from:
+    - podSelector: {}
+  # Allow Ingress from Istio Ingress Gateway (in istio-system)
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: istio-system
+  # Allow Egress to essential services
+  egress:
+  - to: # Allow Intra-namespace egress
+    - podSelector: {}
+  - to: # Allow DNS (kube-system)
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: kube-system
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+  - to: # Allow Istiod (istio-system) for XDS updates
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: istio-system
+  - to: # Allow Postgres Subnet
+    - ipBlock:
+        cidr: 10.1.4.0/24
+  - to: # Allow Data Subnet (Redis/KeyVault PEs)
+    - ipBlock:
+        cidr: 10.1.3.0/24
+  - to: # Allow Azure Metadata (IMDS)
+    - ipBlock:
+        cidr: 169.254.169.254/32

@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: audit-service
+  namespace: payments-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: audit-service
+  template:
+    metadata:
+      labels:
+        app: audit-service
+    spec:
+      serviceAccountName: audit-service
+      containers:
+      - name: audit-service
+        image: audit-service
+        ports:
+        - containerPort: 3006
+        livenessProbe:
+          httpGet:
+            path: /health/liveness
+            port: 3006
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health/readiness
+            port: 3006
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        envFrom:
+        - configMapRef:
+            name: audit-service-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: audit-service
+  namespace: payments-system
+spec:
+  selector:
+    app: audit-service
+  ports:
+  - port: 3006
+    targetPort: 3006
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: audit-service-config
+  namespace: payments-system
+data:
+  PORT: "3006"
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: audit-service
+  namespace: payments-system

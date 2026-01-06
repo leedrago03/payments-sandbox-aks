@@ -25,8 +25,8 @@ func main() {
         log.Fatalf("Failed to load config: %v", err)
     }
     
-    connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-        cfg.DBHost, cfg.DBPort, cfg.DBUser, cfg.DBPassword, cfg.DBName)
+    connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
+        cfg.DBHost, cfg.DBPort, cfg.DBUser, cfg.DBPassword, cfg.DBName, cfg.DBSSLMode)
     
     db, err := database.InitDB(connStr)
     if err != nil {
@@ -37,8 +37,10 @@ func main() {
     // Initialize Event Bus
     var eventBus events.EventBus
     if redisAddr := os.Getenv("REDIS_ADDR"); redisAddr != "" {
-        eventBus = events.NewRedisBus(redisAddr, "", 0)
-        log.Printf("Using Redis Event Bus at %s", redisAddr)
+        redisPassword := os.Getenv("REDIS_PASSWORD")
+        useTLS := os.Getenv("REDIS_TLS") == "true"
+        eventBus = events.NewRedisBus(redisAddr, redisPassword, 0, useTLS)
+        log.Printf("Using Redis Event Bus at %s (TLS: %v)", redisAddr, useTLS)
     } else {
         eventBus = events.NewMemoryBus()
         log.Println("Using In-Memory Event Bus")

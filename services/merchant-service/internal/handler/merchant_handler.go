@@ -99,3 +99,28 @@ func (h *MerchantHandler) GetAPIKeys(c *fiber.Ctx) error {
     
     return c.JSON(keys)
 }
+
+type VerifyAPIKeyRequest struct {
+    APIKey string `json:"api_key"`
+}
+
+// VerifyAPIKey checks if an API key is valid
+func (h *MerchantHandler) VerifyAPIKey(c *fiber.Ctx) error {
+    var req VerifyAPIKeyRequest
+    if err := c.BodyParser(&req); err != nil {
+        return c.Status(400).JSON(fiber.Map{"error": "Invalid request body"})
+    }
+
+    key, err := h.service.VerifyAPIKey(req.APIKey)
+    if err != nil {
+        if err.Error() == "invalid api key" {
+            return c.Status(401).JSON(fiber.Map{"valid": false, "error": "Invalid API key"})
+        }
+        return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+    }
+
+    return c.JSON(fiber.Map{
+        "valid":       true,
+        "merchant_id": key.MerchantID,
+    })
+}

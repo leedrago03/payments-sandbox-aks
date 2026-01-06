@@ -1,0 +1,68 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: payment-service-config
+  namespace: payments-system
+data:
+  REDIS_ADDR: "redis-payments-a2q7x9.redis.cache.windows.net:6380"
+  REDIS_TLS: "true"
+  EVENTHUB_NAMESPACE: "ehns-payments-dev.servicebus.windows.net"
+  EVENTHUB_NAME: "payment-events"
+  KEYVAULT_URI: "https://kv-payments-a2q7x9.vault.azure.net/"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: audit-service-config
+  namespace: payments-system
+data:
+  REDIS_ADDR: "redis-payments-a2q7x9.redis.cache.windows.net:6380"
+  REDIS_TLS: "true"
+  DB_HOST: "psql-payments-a2q7x9.postgres.database.azure.com"
+  DB_NAME: "audit"
+  DB_SSLMODE: "require"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ledger-service-config
+  namespace: payments-system
+data:
+  REDIS_ADDR: "redis-payments-a2q7x9.redis.cache.windows.net:6380"
+  REDIS_TLS: "true"
+  DB_HOST: "psql-payments-a2q7x9.postgres.database.azure.com"
+  DB_NAME: "ledger"
+  DB_SSLMODE: "require"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tokenization-service-config
+  namespace: payments-system
+data:
+  KEYVAULT_URL: "https://kv-payments-a2q7x9.vault.azure.net/"
+  DB_HOST: "psql-payments-a2q7x9.postgres.database.azure.com"
+  DB_NAME: "tokenization"
+  DB_SSLMODE: "require"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: merchant-service-config
+  namespace: payments-system
+data:
+  DB_HOST: "psql-payments-a2q7x9.postgres.database.azure.com"
+  DB_NAME: "merchants"
+  DB_SSLMODE: "require"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: reconciliation-service-config
+  namespace: payments-system
+data:
+  DB_HOST: "psql-payments-a2q7x9.postgres.database.azure.com"
+  DB_NAME: "reconciliation"
+  DB_SSLMODE: "require"
+  EVENTHUB_NAMESPACE: "ehns-payments-dev.servicebus.windows.net"
+  EVENTHUB_NAME: "reconciliation-events"

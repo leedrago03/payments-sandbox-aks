@@ -12,6 +12,7 @@ type Config struct {
     DBUser     string
     DBPassword string
     DBName     string
+    DBSSLMode  string
 }
 
 func Load() (*Config, error) {
@@ -22,8 +23,9 @@ func Load() (*Config, error) {
         DBHost:     getEnv("DB_HOST", "localhost"),
         DBPort:     getEnv("DB_PORT", "5432"),
         DBUser:     getEnv("DB_USER", "postgres"),
-        DBPassword: getEnv("DB_PASSWORD", "postgres123"),
+        DBPassword: getEnvRequired("DB_PASSWORD"),
         DBName:     getEnv("DB_NAME", "reconciliation"),
+        DBSSLMode:  getEnv("DB_SSLMODE", "disable"),
     }, nil
 }
 
@@ -32,4 +34,11 @@ func getEnv(key, defaultValue string) string {
         return value
     }
     return defaultValue
+}
+
+func getEnvRequired(key string) string {
+    if value := os.Getenv(key); value != "" {
+        return value
+    }
+    panic("Missing required environment variable: " + key)
 }

@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tokenization-service
+  namespace: payments-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tokenization-service
+  template:
+    metadata:
+      labels:
+        app: tokenization-service
+    spec:
+      serviceAccountName: tokenization-service
+      containers:
+      - name: tokenization-service
+        image: tokenization-service
+        ports:
+        - containerPort: 3003
+        livenessProbe:
+          httpGet:
+            path: /health/liveness
+            port: 3003
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health/readiness
+            port: 3003
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        envFrom:
+        - configMapRef:
+            name: tokenization-service-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tokenization-service
+  namespace: payments-system
+spec:
+  selector:
+    app: tokenization-service
+  ports:
+  - port: 3003
+    targetPort: 3003
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tokenization-service-config
+  namespace: payments-system
+data:
+  PORT: "3003"
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: tokenization-service
+  namespace: payments-system

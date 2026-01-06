@@ -57,6 +57,9 @@ func main() {
     api.Post("/:id/api-keys", merchantHandler.CreateAPIKey)
     api.Get("/:id/api-keys", merchantHandler.GetAPIKeys)
     
+    // Internal routes (for Gateway/other services)
+    app.Post("/internal/api-keys/verify", merchantHandler.VerifyAPIKey)
+
     // Start server
     log.Printf("Merchant Service starting on port %s", cfg.ServerPort)
     if err := app.Listen("0.0.0.0:" + cfg.ServerPort); err != nil {

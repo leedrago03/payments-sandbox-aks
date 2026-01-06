@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ledger-service
+  namespace: payments-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ledger-service
+  template:
+    metadata:
+      labels:
+        app: ledger-service
+    spec:
+      serviceAccountName: ledger-service
+      containers:
+      - name: ledger-service
+        image: ledger-service
+        ports:
+        - containerPort: 3005
+        livenessProbe:
+          httpGet:
+            path: /health/liveness
+            port: 3005
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health/readiness
+            port: 3005
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        envFrom:
+        - configMapRef:
+            name: ledger-service-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ledger-service
+  namespace: payments-system
+spec:
+  selector:
+    app: ledger-service
+  ports:
+  - port: 3005
+    targetPort: 3005
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ledger-service-config
+  namespace: payments-system
+data:
+  PORT: "3005"
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ledger-service
+  namespace: payments-system

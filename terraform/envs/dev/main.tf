@@ -83,6 +83,21 @@ resource "azurerm_private_dns_zone_virtual_network_link" "postgres_dns_link" {
   tags                  = var.tags
 }
 
+# Redis Private DNS Zone (NEW)
+resource "azurerm_private_dns_zone" "redis_dns" {
+  name                = "privatelink.redis.cache.windows.net"
+  resource_group_name = var.resource_group_name
+  tags                = var.tags
+}
+
+resource "azurerm_private_dns_zone_virtual_network_link" "redis_dns_link" {
+  name                  = "link-redis-spoke"
+  resource_group_name   = var.resource_group_name
+  private_dns_zone_name = azurerm_private_dns_zone.redis_dns.name
+  virtual_network_id    = module.networking.spoke_vnet_id
+  tags                  = var.tags
+}
+
 # PostgreSQL Module
 module "postgresql" {
   source                 = "../../modules/postgresql"
@@ -103,6 +118,7 @@ module "redis" {
   location            = var.location
   redis_name          = "redis-payments-${random_string.suffix.result}"
   data_subnet_id      = module.networking.data_subnet_id
+  private_dns_zone_id = azurerm_private_dns_zone.redis_dns.id
   tags                = var.tags
 }
 

@@ -111,7 +111,31 @@ resource "azurerm_network_security_group" "aks" {
   }
 
   security_rule {
-    name                       = "Allow_AKS_to_Data"
+    name                       = "Allow_Public_HTTP"
+    priority                   = 120
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "80"
+    source_address_prefix      = "Internet"
+    destination_address_prefix = "*"
+  }
+
+  security_rule {
+    name                       = "Allow_Public_API_Gateway"
+    priority                   = 130
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "3000"
+    source_address_prefix      = "Internet"
+    destination_address_prefix = "*"
+  }
+
+  security_rule {
+    name                       = "Allow_AKS_to_HTTPS"
     priority                   = 110
     direction                  = "Outbound"
     access                     = "Allow"
@@ -119,7 +143,31 @@ resource "azurerm_network_security_group" "aks" {
     source_port_range          = "*"
     destination_port_range     = "443"
     source_address_prefix      = "10.1.1.0/24"
-    destination_address_prefix = "10.1.3.0/24" # Data subnet
+    destination_address_prefix = "10.1.3.0/24"
+  }
+
+  security_rule {
+    name                       = "Allow_AKS_to_Postgres"
+    priority                   = 111
+    direction                  = "Outbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "5432"
+    source_address_prefix      = "10.1.1.0/24"
+    destination_address_prefix = "10.1.3.0/24"
+  }
+
+  security_rule {
+    name                       = "Allow_AKS_to_Redis"
+    priority                   = 112
+    direction                  = "Outbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "6380"
+    source_address_prefix      = "10.1.1.0/24"
+    destination_address_prefix = "10.1.3.0/24"
   }
 }
 
@@ -135,13 +183,37 @@ resource "azurerm_network_security_group" "data" {
   tags                = var.tags
 
   security_rule {
-    name                       = "Allow_AKS_to_PrivateEndpoints"
+    name                       = "Allow_AKS_to_HTTPS"
     priority                   = 100
     direction                  = "Inbound"
     access                     = "Allow"
     protocol                   = "Tcp"
     source_port_range          = "*"
     destination_port_range     = "443"
+    source_address_prefix      = "10.1.1.0/24"
+    destination_address_prefix = "*"
+  }
+
+  security_rule {
+    name                       = "Allow_AKS_to_Postgres"
+    priority                   = 101
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "5432"
+    source_address_prefix      = "10.1.1.0/24"
+    destination_address_prefix = "*"
+  }
+
+  security_rule {
+    name                       = "Allow_AKS_to_Redis"
+    priority                   = 102
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "6380"
     source_address_prefix      = "10.1.1.0/24"
     destination_address_prefix = "*"
   }

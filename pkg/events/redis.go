@@ -2,6 +2,7 @@ package events
 
 import (
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 
@@ -13,13 +14,21 @@ type RedisBus struct {
 	client *redis.Client
 }
 
-// NewRedisBus creates a new RedisBus.
-func NewRedisBus(addr string, password string, db int) *RedisBus {
-	client := redis.NewClient(&redis.Options{
+// NewRedisBus creates a new RedisBus with support for TLS and Auth.
+func NewRedisBus(addr string, password string, db int, useTLS bool) *RedisBus {
+	opts := &redis.Options{
 		Addr:     addr,
 		Password: password,
 		DB:       db,
-	})
+	}
+
+	if useTLS {
+		opts.TLSConfig = &tls.Config{
+			MinVersion: tls.VersionTLS12,
+		}
+	}
+
+	client := redis.NewClient(opts)
 	return &RedisBus{client: client}
 }
 

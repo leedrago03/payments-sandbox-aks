@@ -1,0 +1,234 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-service
+  namespace: payments-system
+spec:
+  template:
+    spec:
+      containers:
+      - name: payment-service
+        image: acrpaymentsdeva2q7x9.azurecr.io/payments-sandbox/payment-service:latest
+        env:
+        - name: AZURE_CLIENT_ID
+          value: "928d399a-ceb5-4c18-bad7-97b208b55c1c"
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: postgresql-credentials
+              key: username
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgresql-credentials
+              key: password
+        - name: DB_HOST
+          valueFrom:
+            secretKeyRef:
+              name: postgresql-credentials
+              key: host
+        - name: DB_NAME
+          value: "payments"
+        - name: DB_SSLMODE
+          value: "require"
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: redis-credentials
+              key: password
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: audit-service
+  namespace: payments-system
+spec:
+  template:
+    spec:
+      containers:
+      - name: audit-service
+        image: acrpaymentsdeva2q7x9.azurecr.io/payments-sandbox/audit-service:latest
+        env:
+        - name: AZURE_CLIENT_ID
+          value: "df938811-a177-4294-923b-26946e060a5b"
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: postgresql-credentials
+              key: username
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgresql-credentials
+              key: password
+        - name: DB_SSLMODE
+          value: "require"
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: redis-credentials
+              key: password
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ledger-service
+  namespace: payments-system
+spec:
+  template:
+    spec:
+      containers:
+      - name: ledger-service
+        image: acrpaymentsdeva2q7x9.azurecr.io/payments-sandbox/ledger-service:latest
+        env:
+        - name: AZURE_CLIENT_ID
+          value: "4bb7b4bb-52c6-424b-9a56-102b66a6c645"
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: postgresql-credentials
+              key: username
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgresql-credentials
+              key: password
+        - name: DB_SSLMODE
+          value: "require"
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: redis-credentials
+              key: password
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tokenization-service
+  namespace: payments-system
+spec:
+  template:
+    spec:
+      containers:
+      - name: tokenization-service
+        image: acrpaymentsdeva2q7x9.azurecr.io/payments-sandbox/tokenization-service:latest
+        env:
+        - name: AZURE_CLIENT_ID
+          value: "96376767-cad6-46cf-96df-5a21d3de47f7"
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: postgresql-credentials
+              key: username
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgresql-credentials
+              key: password
+        - name: DB_HOST
+          valueFrom:
+            secretKeyRef:
+              name: postgresql-credentials
+              key: host
+        - name: DB_NAME
+          value: "tokenization"
+        - name: DB_SSLMODE
+          value: "require"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: merchant-service
+  namespace: payments-system
+spec:
+  template:
+    spec:
+      containers:
+      - name: merchant-service
+        image: acrpaymentsdeva2q7x9.azurecr.io/payments-sandbox/merchant-service:latest
+        env:
+        - name: AZURE_CLIENT_ID
+          value: "70856bf9-6418-4f41-8102-be966158dec8"
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: postgresql-credentials
+              key: username
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgresql-credentials
+              key: password
+        - name: DB_HOST
+          valueFrom:
+            secretKeyRef:
+              name: postgresql-credentials
+              key: host
+        - name: DB_NAME
+          value: "merchants"
+        - name: DB_SSLMODE
+          value: "require"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: acquirer-simulator
+  namespace: payments-system
+spec:
+  template:
+    spec:
+      containers:
+      - name: acquirer-simulator
+        image: acrpaymentsdeva2q7x9.azurecr.io/payments-sandbox/acquirer-simulator:latest
+        env:
+        - name: AZURE_CLIENT_ID
+          value: "7feaf789-cfd9-4e00-83aa-fb76a658d8d4"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reconciliation-service
+  namespace: payments-system
+spec:
+  template:
+    spec:
+      containers:
+      - name: reconciliation-service
+        image: acrpaymentsdeva2q7x9.azurecr.io/payments-sandbox/reconciliation-service:latest
+        env:
+        - name: AZURE_CLIENT_ID
+          value: "c78b45fc-a84e-4ae5-ad8d-bcd0f206a770"
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: postgresql-credentials
+              key: username
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgresql-credentials
+              key: password
+        - name: DB_HOST
+          valueFrom:
+            secretKeyRef:
+              name: postgresql-credentials
+              key: host
+        - name: DB_NAME
+          value: "reconciliation"
+        - name: DB_SSLMODE
+          value: "require"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+  namespace: payments-system
+spec:
+  template:
+    spec:
+      containers:
+      - name: api-gateway
+        image: acrpaymentsdeva2q7x9.azurecr.io/payments-sandbox/api-gateway:latest
+        env:
+        - name: AZURE_CLIENT_ID
+          value: "1af9fccd-4536-4de7-ad18-962e8bd9da99"

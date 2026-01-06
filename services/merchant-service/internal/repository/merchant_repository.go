@@ -125,3 +125,19 @@ func (r *MerchantRepository) FindAPIKeysByMerchantID(merchantID string) ([]model
     
     return keys, nil
 }
+
+func (r *MerchantRepository) FindByKeyHash(keyHash string) (*model.APIKey, error) {
+    var key model.APIKey
+    query := `SELECT id, merchant_id, key_hash, key_prefix, name, status, last_used_at, created_at 
+              FROM api_keys WHERE key_hash = $1 AND status = 'ACTIVE'`
+
+    err := r.db.QueryRow(query, keyHash).Scan(
+        &key.ID, &key.MerchantID, &key.KeyHash, &key.KeyPrefix,
+        &key.Name, &key.Status, &key.LastUsedAt, &key.CreatedAt,
+    )
+
+    if err == sql.ErrNoRows {
+        return nil, nil
+    }
+    return &key, err
+}

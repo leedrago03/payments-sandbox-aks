@@ -31,14 +31,6 @@ func NewKeyVaultClient(keyVaultURI string) (*KeyVaultClient, error) {
 
 // GetEncryptionKey retrieves the encryption key from Azure Key Vault.
 func (kv *KeyVaultClient) GetEncryptionKey(ctx context.Context, keyName string) ([]byte, error) {
-	// In a real scenario, you would fetch the key from Key Vault.
-	// For now, we will use a placeholder key for local development.
-	if os.Getenv("AZURE_KEY_VAULT_URI") == "" {
-		// This is a placeholder for local development and testing.
-		// DO NOT use this in production.
-		return []byte("a-super-secret-key-for-local-dev"), nil
-	}
-
 	key, err := kv.client.GetKey(ctx, keyName, "", nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get key from Key Vault: %w", err)

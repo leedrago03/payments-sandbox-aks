@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: acquirer-simulator
+  namespace: payments-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: acquirer-simulator
+  template:
+    metadata:
+      labels:
+        app: acquirer-simulator
+    spec:
+      serviceAccountName: acquirer-simulator
+      containers:
+      - name: acquirer-simulator
+        image: acquirer-simulator
+        ports:
+        - containerPort: 3004
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3004
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3004
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        envFrom:
+        - configMapRef:
+            name: acquirer-simulator-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: acquirer-simulator
+  namespace: payments-system
+spec:
+  selector:
+    app: acquirer-simulator
+  ports:
+  - port: 3004
+    targetPort: 3004
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: acquirer-simulator-config
+  namespace: payments-system
+data:
+  PORT: "3004"
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: acquirer-simulator
+  namespace: payments-system

@@ -3,6 +3,35 @@
 *.tfstate.*
 .terraform/
 .terraform.lock.hcl
+*.tfplan
 
 # Sensitive
 *.tfvars
+secrets.yaml
+postgres-secret.yaml
+*secret*.yaml
+
+# Golang
+bin/
+*.exe
+*.test
+vendor/
+
+# Editor/IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+
+# Generated/Local Configs
+infrastructure-outputs.json
+full-deployment.yaml
+istio-full-install.yaml
+observability-stack.yaml
+grafana.yaml
+jaeger.yaml
+kiali.yaml
+prometheus.yaml
+debug.log

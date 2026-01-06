@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: merchant-service
+  namespace: payments-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: merchant-service
+  template:
+    metadata:
+      labels:
+        app: merchant-service
+    spec:
+      serviceAccountName: merchant-service
+      containers:
+      - name: merchant-service
+        image: merchant-service
+        ports:
+        - containerPort: 3002
+        livenessProbe:
+          httpGet:
+            path: /health/liveness
+            port: 3002
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health/readiness
+            port: 3002
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        envFrom:
+        - configMapRef:
+            name: merchant-service-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: merchant-service
+  namespace: payments-system
+spec:
+  selector:
+    app: merchant-service
+  ports:
+  - port: 3002
+    targetPort: 3002
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: merchant-service-config
+  namespace: payments-system
+data:
+  PORT: "3002"
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: merchant-service
+  namespace: payments-system

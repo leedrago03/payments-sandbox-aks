@@ -1,0 +1,44 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base/namespaces
+  - ../../base/payment-service
+  - ../../base/tokenization-service
+  - ../../base/audit-service
+  - ../../base/ledger-service
+  - ../../base/merchant-service
+  - ../../base/acquirer-simulator
+  - ../../base/reconciliation-service
+  - ../../base/api-gateway
+
+patchesStrategicMerge:
+  - configmap-patch.yaml
+  - deployment-patch.yaml
+  - service-patch.yaml
+
+images:
+  - name: payment-service
+    newName: acrpaymentsdeva2q7x9.azurecr.io/payments-sandbox/payment-service
+    newTag: latest
+  - name: tokenization-service
+    newName: acrpaymentsdeva2q7x9.azurecr.io/payments-sandbox/tokenization-service
+    newTag: latest
+  - name: audit-service
+    newName: acrpaymentsdeva2q7x9.azurecr.io/payments-sandbox/audit-service
+    newTag: latest
+  - name: ledger-service
+    newName: acrpaymentsdeva2q7x9.azurecr.io/payments-sandbox/ledger-service
+    newTag: latest
+  - name: merchant-service
+    newName: acrpaymentsdeva2q7x9.azurecr.io/payments-sandbox/merchant-service
+    newTag: latest
+  - name: acquirer-simulator
+    newName: acrpaymentsdeva2q7x9.azurecr.io/payments-sandbox/acquirer-simulator
+    newTag: latest
+  - name: reconciliation-service
+    newName: acrpaymentsdeva2q7x9.azurecr.io/payments-sandbox/reconciliation-service
+    newTag: latest
+  - name: api-gateway
+    newName: acrpaymentsdeva2q7x9.azurecr.io/payments-sandbox/api-gateway
+    newTag: latest
