@@ -37,12 +37,18 @@ Based on [Azure AKS Secure Baseline](https://learn.microsoft.com/en-us/azure/arc
 | **Reconciliation**| 3007 | Batch settlement verification. |
 
 ## Repository Structure
-├── apps/ # Microservices (Go + React)
-├── terraform/ # Infrastructure as Code
+├── apps/# Microservices (Go + React)
+
+├── terraform/# Infrastructure as Code
+
 ├── k8s-manifests/ # Kubernetes manifests (GitOps source)
+
 ├── istio/ # Service mesh configuration
+
 ├── policies/ # OPA Gatekeeper & Network Policies
+
 ├── ci-cd/ # CI/CD pipelines
+
 └── docs/ # Architecture & runbooks
 
 ## Quick Start
