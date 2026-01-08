@@ -68,6 +68,11 @@ spec:
             secretKeyRef:
               name: redis-credentials
               key: password
+        - name: AUDIT_HMAC_KEY
+          valueFrom:
+            secretKeyRef:
+              name: audit-secrets
+              key: AUDIT_HMAC_KEY
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -134,6 +139,10 @@ spec:
           value: "tokenization"
         - name: DB_SSLMODE
           value: "require"
+        - name: AZURE_KEY_VAULT_URI
+          value: "https://kv-payments-84bwov.vault.azure.net/"
+        - name: AZURE_KEY_NAME
+          value: "payment-encryption-key"
 ---
 apiVersion: apps/v1
 kind: Deployment

@@ -36,36 +36,7 @@ spec:
         envFrom:
         - configMapRef:
             name: payment-service-config
-        env:
-        - name: SPRING_DATASOURCE_URL
-          value: "jdbc:postgresql://$(POSTGRES_HOST):$(POSTGRES_PORT)/payments?sslmode=$(POSTGRES_SSLMODE)"
-        - name: SPRING_DATASOURCE_USERNAME
-          valueFrom:
-            secretKeyRef:
-              name: postgresql-credentials
-              key: username
-        - name: SPRING_DATASOURCE_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: postgresql-credentials
-              key: password
-        - name: POSTGRES_HOST
-          valueFrom:
-            secretKeyRef:
-              name: postgresql-credentials
-              key: host
-        - name: POSTGRES_PORT
-          valueFrom:
-            secretKeyRef:
-              name: postgresql-credentials
-              key: port
-        - name: POSTGRES_SSLMODE
-          valueFrom:
-            secretKeyRef:
-              name: postgresql-credentials
-              key: sslmode
-        - name: AZURE_CLIENT_ID
-          value: "43cb324c-c3e4-4d00-9f7a-66a2e46e59e3"
+        env: []
         resources:
           requests:
             memory: "512Mi"

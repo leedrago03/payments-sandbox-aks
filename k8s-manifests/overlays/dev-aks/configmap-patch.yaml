@@ -40,7 +40,6 @@ metadata:
   name: tokenization-service-config
   namespace: payments-system
 data:
-  KEYVAULT_URL: "https://kv-payments-84bwov.vault.azure.net/"
   DB_HOST: "psql-payments-84bwov.postgres.database.azure.com"
   DB_NAME: "tokenization"
   DB_SSLMODE: "require"
