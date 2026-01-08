@@ -9,5 +9,6 @@ resources:
   - observability/kiali.yaml
   - observability/jaeger.yaml
   - observability/grafana.yaml
+  - argocd-ingress-policy.yaml
 
 namespace: istio-system

@@ -12,7 +12,7 @@ spec:
       name: http
       protocol: HTTP
     hosts:
-    - "*"
+    - "*.172.188.195.67.nip.io"
 ---
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
@@ -21,16 +21,13 @@ metadata:
   namespace: istio-system
 spec:
   hosts:
-  - "*"
+  - "kiali.172.188.195.67.nip.io"
   gateways:
   - dashboard-gateway
   http:
-  - match:
-    - uri:
-        prefix: /kiali
-    route:
+  - route:
     - destination:
-        host: kiali
+        host: kiali.istio-system.svc.cluster.local
         port:
           number: 20001
 ---
@@ -41,15 +38,46 @@ metadata:
   namespace: istio-system
 spec:
   hosts:
-  - "*"
+  - "grafana.172.188.195.67.nip.io"
   gateways:
   - dashboard-gateway
   http:
-  - match:
-    - uri:
-        prefix: /grafana
-    route:
+  - route:
     - destination:
-        host: grafana
+        host: grafana.istio-system.svc.cluster.local
         port:
           number: 3000
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: jaeger-vs
+  namespace: istio-system
+spec:
+  hosts:
+  - "jaeger.172.188.195.67.nip.io"
+  gateways:
+  - dashboard-gateway
+  http:
+  - route:
+    - destination:
+        host: tracing.istio-system.svc.cluster.local
+        port:
+          number: 80
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: argocd-vs
+  namespace: istio-system
+spec:
+  hosts:
+  - "argocd.172.188.195.67.nip.io"
+  gateways:
+  - dashboard-gateway
+  http:
+  - route:
+    - destination:
+        host: argocd-server.argocd.svc.cluster.local
+        port:
+          number: 80
