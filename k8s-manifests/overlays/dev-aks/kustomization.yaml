@@ -16,6 +16,7 @@ patchesStrategicMerge:
   - configmap-patch.yaml
   - deployment-patch.yaml
   - service-patch.yaml
+  - serviceaccount-patch.yaml
 
 images:
   - name: payment-service

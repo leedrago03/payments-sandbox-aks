@@ -5,6 +5,9 @@ metadata:
   namespace: payments-system
 spec:
   template:
+    metadata:
+      labels:
+        azure.workload.identity/use: "true"
     spec:
       containers:
       - name: payment-service
@@ -44,6 +47,9 @@ metadata:
   namespace: payments-system
 spec:
   template:
+    metadata:
+      labels:
+        azure.workload.identity/use: "true"
     spec:
       containers:
       - name: audit-service
@@ -81,6 +87,9 @@ metadata:
   namespace: payments-system
 spec:
   template:
+    metadata:
+      labels:
+        azure.workload.identity/use: "true"
     spec:
       containers:
       - name: ledger-service
@@ -113,6 +122,9 @@ metadata:
   namespace: payments-system
 spec:
   template:
+    metadata:
+      labels:
+        azure.workload.identity/use: "true"
     spec:
       containers:
       - name: tokenization-service
@@ -151,6 +163,9 @@ metadata:
   namespace: payments-system
 spec:
   template:
+    metadata:
+      labels:
+        azure.workload.identity/use: "true"
     spec:
       containers:
       - name: merchant-service
@@ -185,6 +200,9 @@ metadata:
   namespace: payments-system
 spec:
   template:
+    metadata:
+      labels:
+        azure.workload.identity/use: "true"
     spec:
       containers:
       - name: acquirer-simulator
@@ -200,6 +218,9 @@ metadata:
   namespace: payments-system
 spec:
   template:
+    metadata:
+      labels:
+        azure.workload.identity/use: "true"
     spec:
       containers:
       - name: reconciliation-service
@@ -234,6 +255,9 @@ metadata:
   namespace: payments-system
 spec:
   template:
+    metadata:
+      labels:
+        azure.workload.identity/use: "true"
     spec:
       containers:
       - name: api-gateway
