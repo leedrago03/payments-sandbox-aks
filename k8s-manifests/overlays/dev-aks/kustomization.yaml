@@ -19,26 +19,26 @@ patchesStrategicMerge:
 
 images:
   - name: payment-service
-    newName: acrpaymentsdeva2q7x9.azurecr.io/payments-sandbox/payment-service
+    newName: acrpaymentsdev84bwov.azurecr.io/payments-sandbox/payment-service
     newTag: latest
   - name: tokenization-service
-    newName: acrpaymentsdeva2q7x9.azurecr.io/payments-sandbox/tokenization-service
+    newName: acrpaymentsdev84bwov.azurecr.io/payments-sandbox/tokenization-service
     newTag: latest
   - name: audit-service
-    newName: acrpaymentsdeva2q7x9.azurecr.io/payments-sandbox/audit-service
+    newName: acrpaymentsdev84bwov.azurecr.io/payments-sandbox/audit-service
     newTag: latest
   - name: ledger-service
-    newName: acrpaymentsdeva2q7x9.azurecr.io/payments-sandbox/ledger-service
+    newName: acrpaymentsdev84bwov.azurecr.io/payments-sandbox/ledger-service
     newTag: latest
   - name: merchant-service
-    newName: acrpaymentsdeva2q7x9.azurecr.io/payments-sandbox/merchant-service
+    newName: acrpaymentsdev84bwov.azurecr.io/payments-sandbox/merchant-service
     newTag: latest
   - name: acquirer-simulator
-    newName: acrpaymentsdeva2q7x9.azurecr.io/payments-sandbox/acquirer-simulator
+    newName: acrpaymentsdev84bwov.azurecr.io/payments-sandbox/acquirer-simulator
     newTag: latest
   - name: reconciliation-service
-    newName: acrpaymentsdeva2q7x9.azurecr.io/payments-sandbox/reconciliation-service
+    newName: acrpaymentsdev84bwov.azurecr.io/payments-sandbox/reconciliation-service
     newTag: latest
   - name: api-gateway
-    newName: acrpaymentsdeva2q7x9.azurecr.io/payments-sandbox/api-gateway
+    newName: acrpaymentsdev84bwov.azurecr.io/payments-sandbox/api-gateway
     newTag: latest

@@ -8,10 +8,10 @@ spec:
     spec:
       containers:
       - name: payment-service
-        image: acrpaymentsdeva2q7x9.azurecr.io/payments-sandbox/payment-service:latest
+        image: acrpaymentsdev84bwov.azurecr.io/payments-sandbox/payment-service:latest
         env:
         - name: AZURE_CLIENT_ID
-          value: "928d399a-ceb5-4c18-bad7-97b208b55c1c"
+          value: "c43b3f46-fba8-4e3e-99b3-93d43051ae80"
         - name: DB_USER
           valueFrom:
             secretKeyRef:
@@ -47,10 +47,10 @@ spec:
     spec:
       containers:
       - name: audit-service
-        image: acrpaymentsdeva2q7x9.azurecr.io/payments-sandbox/audit-service:latest
+        image: acrpaymentsdev84bwov.azurecr.io/payments-sandbox/audit-service:latest
         env:
         - name: AZURE_CLIENT_ID
-          value: "df938811-a177-4294-923b-26946e060a5b"
+          value: "e2fb3ff1-04d7-4e8c-875f-dd63d8d5e198"
         - name: DB_USER
           valueFrom:
             secretKeyRef:
@@ -79,10 +79,10 @@ spec:
     spec:
       containers:
       - name: ledger-service
-        image: acrpaymentsdeva2q7x9.azurecr.io/payments-sandbox/ledger-service:latest
+        image: acrpaymentsdev84bwov.azurecr.io/payments-sandbox/ledger-service:latest
         env:
         - name: AZURE_CLIENT_ID
-          value: "4bb7b4bb-52c6-424b-9a56-102b66a6c645"
+          value: "e62ce72b-4796-465c-9b1d-d39f339f9eda"
         - name: DB_USER
           valueFrom:
             secretKeyRef:
@@ -111,10 +111,10 @@ spec:
     spec:
       containers:
       - name: tokenization-service
-        image: acrpaymentsdeva2q7x9.azurecr.io/payments-sandbox/tokenization-service:latest
+        image: acrpaymentsdev84bwov.azurecr.io/payments-sandbox/tokenization-service:latest
         env:
         - name: AZURE_CLIENT_ID
-          value: "96376767-cad6-46cf-96df-5a21d3de47f7"
+          value: "316c2b37-c4d2-4577-bdeb-47cdb0f47692"
         - name: DB_USER
           valueFrom:
             secretKeyRef:
@@ -145,10 +145,10 @@ spec:
     spec:
       containers:
       - name: merchant-service
-        image: acrpaymentsdeva2q7x9.azurecr.io/payments-sandbox/merchant-service:latest
+        image: acrpaymentsdev84bwov.azurecr.io/payments-sandbox/merchant-service:latest
         env:
         - name: AZURE_CLIENT_ID
-          value: "70856bf9-6418-4f41-8102-be966158dec8"
+          value: "11ffd129-a2da-4e41-959e-37d127f365d1"
         - name: DB_USER
           valueFrom:
             secretKeyRef:
@@ -179,10 +179,10 @@ spec:
     spec:
       containers:
       - name: acquirer-simulator
-        image: acrpaymentsdeva2q7x9.azurecr.io/payments-sandbox/acquirer-simulator:latest
+        image: acrpaymentsdev84bwov.azurecr.io/payments-sandbox/acquirer-simulator:latest
         env:
         - name: AZURE_CLIENT_ID
-          value: "7feaf789-cfd9-4e00-83aa-fb76a658d8d4"
+          value: "e3b8f8ac-84b6-4a6d-9c6c-17b08ee8d1f3"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -194,10 +194,10 @@ spec:
     spec:
       containers:
       - name: reconciliation-service
-        image: acrpaymentsdeva2q7x9.azurecr.io/payments-sandbox/reconciliation-service:latest
+        image: acrpaymentsdev84bwov.azurecr.io/payments-sandbox/reconciliation-service:latest
         env:
         - name: AZURE_CLIENT_ID
-          value: "c78b45fc-a84e-4ae5-ad8d-bcd0f206a770"
+          value: "7c739f54-ccfe-4576-ab0d-8037b75231e4"
         - name: DB_USER
           valueFrom:
             secretKeyRef:
@@ -228,7 +228,7 @@ spec:
     spec:
       containers:
       - name: api-gateway
-        image: acrpaymentsdeva2q7x9.azurecr.io/payments-sandbox/api-gateway:latest
+        image: acrpaymentsdev84bwov.azurecr.io/payments-sandbox/api-gateway:latest
         env:
         - name: AZURE_CLIENT_ID
-          value: "1af9fccd-4536-4de7-ad18-962e8bd9da99"
+          value: "50be3583-7131-400a-a9c3-d2ade47c97da"
