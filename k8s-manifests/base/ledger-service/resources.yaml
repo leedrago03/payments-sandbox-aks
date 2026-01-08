@@ -44,7 +44,8 @@ spec:
   selector:
     app: ledger-service
   ports:
-  - port: 3005
+  - name: http-api
+    port: 3005
     targetPort: 3005
 ---
 apiVersion: v1

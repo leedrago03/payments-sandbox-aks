@@ -44,7 +44,8 @@ spec:
   selector:
     app: audit-service
   ports:
-  - port: 3006
+  - name: http-api
+    port: 3006
     targetPort: 3006
 ---
 apiVersion: v1

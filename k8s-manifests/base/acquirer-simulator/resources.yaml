@@ -44,7 +44,8 @@ spec:
   selector:
     app: acquirer-simulator
   ports:
-  - port: 3004
+  - name: http-api
+    port: 3004
     targetPort: 3004
 ---
 apiVersion: v1

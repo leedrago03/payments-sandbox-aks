@@ -44,7 +44,8 @@ spec:
   selector:
     app: merchant-service
   ports:
-  - port: 3002
+  - name: http-api
+    port: 3002
     targetPort: 3002
 ---
 apiVersion: v1

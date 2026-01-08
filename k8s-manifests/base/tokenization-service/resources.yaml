@@ -44,7 +44,8 @@ spec:
   selector:
     app: tokenization-service
   ports:
-  - port: 3003
+  - name: http-api
+    port: 3003
     targetPort: 3003
 ---
 apiVersion: v1
