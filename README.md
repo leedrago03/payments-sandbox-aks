@@ -36,20 +36,25 @@ Based on [Azure AKS Secure Baseline](https://learn.microsoft.com/en-us/azure/arc
 | **Acquirer Sim** | 3004 | Simulates bank responses. |
 | **Reconciliation**| 3007 | Batch settlement verification. |
 
-## Repository Structure
-├── apps/# Microservices (Go + React)
+## Directory Structure
+```
 
-├── terraform/# Infrastructure as Code
-
-├── k8s-manifests/ # Kubernetes manifests (GitOps source)
-
-├── istio/ # Service mesh configuration
-
-├── policies/ # OPA Gatekeeper & Network Policies
-
-├── ci-cd/ # CI/CD pipelines
-
-└── docs/ # Architecture & runbooks
+├── apps/               # Frontend applications
+├── ci-cd/              # CI/CD pipelines
+├── k8s-manifests/      # Kubernetes YAMLs
+│   ├── base/           # Base resources
+│   └── overlays/       # Env-specific patches (CRITICAL: Update these on reset)
+├── istio/              # Service Mesh Configs
+│   ├── security/       # PeerAuthentication
+│   ├── gateways/       # Ingress/Egress Gateways
+│   └── destinationrules/ # mTLS settings
+├── pkg/                # Shared Go Libraries
+├── policies/           # Security Policies
+│   └── networkpolicies/ # K8s NetworkPolicies (Zero Trust)
+├── services/           # Microservices
+├── terraform/          # Infrastructure as Code
+└── build-and-push.sh   # Build script
+```
 
 ## Quick Start
 See [docs/00-readme/local-setup.md](docs/00-readme/local-setup.md) for prerequisites and setup instructions.
