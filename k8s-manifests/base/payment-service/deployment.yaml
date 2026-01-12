@@ -17,17 +17,17 @@ spec:
         app: payment-service
         version: v1
       annotations:
-        sidecar.istio.io/inject: "true"
-        prometheus.io/scrape: "true"
-        prometheus.io/port: "8081"
-        prometheus.io/path: "/actuator/prometheus"
+        sidecar.istio.io/inject: 'true'
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '8081'
+        prometheus.io/path: /actuator/prometheus
     spec:
       serviceAccountName: payment-service
       nodeSelector:
         workload-type: application
       containers:
       - name: payment-service
-        image: acrpaymentsdevs0d5ry.azurecr.io/payment-service:latest
+        image: payment-service
         imagePullPolicy: Always
         ports:
         - containerPort: 8081
@@ -39,11 +39,11 @@ spec:
         env: []
         resources:
           requests:
-            memory: "512Mi"
-            cpu: "250m"
+            memory: 512Mi
+            cpu: 250m
           limits:
-            memory: "1Gi"
-            cpu: "500m"
+            memory: 1Gi
+            cpu: 500m
         livenessProbe:
           httpGet:
             path: /health/liveness

@@ -17,17 +17,17 @@ spec:
         app: api-gateway
         version: v1
       annotations:
-        sidecar.istio.io/inject: "true"
-        prometheus.io/scrape: "true"
-        prometheus.io/port: "3000"
-        prometheus.io/path: "/metrics"
+        sidecar.istio.io/inject: 'true'
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '3000'
+        prometheus.io/path: /metrics
     spec:
       serviceAccountName: api-gateway
       nodeSelector:
         workload-type: application
       containers:
       - name: api-gateway
-        image: acrpaymentsdevs0d5ry.azurecr.io/api-gateway:latest
+        image: api-gateway
         imagePullPolicy: Always
         ports:
         - containerPort: 3000
@@ -44,14 +44,14 @@ spec:
               key: secret
               optional: true
         - name: AZURE_CLIENT_ID
-          value: "357c9c80-e0e5-4d91-805e-cc329dee4565"
+          value: 357c9c80-e0e5-4d91-805e-cc329dee4565
         resources:
           requests:
-            memory: "256Mi"
-            cpu: "100m"
+            memory: 256Mi
+            cpu: 100m
           limits:
-            memory: "512Mi"
-            cpu: "500m"
+            memory: 512Mi
+            cpu: 500m
         livenessProbe:
           httpGet:
             path: /health/liveness

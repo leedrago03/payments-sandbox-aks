@@ -54,7 +54,7 @@ metadata:
   name: merchant-service-config
   namespace: payments-system
 data:
-  PORT: "3002"
+  PORT: '3002'
 ---
 apiVersion: v1
 kind: ServiceAccount

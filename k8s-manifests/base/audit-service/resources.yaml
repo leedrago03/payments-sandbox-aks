@@ -54,7 +54,7 @@ metadata:
   name: audit-service-config
   namespace: payments-system
 data:
-  PORT: "3006"
+  PORT: '3006'
 ---
 apiVersion: v1
 kind: ServiceAccount

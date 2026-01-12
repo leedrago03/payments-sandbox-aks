@@ -54,7 +54,7 @@ metadata:
   name: reconciliation-service-config
   namespace: payments-system
 data:
-  PORT: "3007"
+  PORT: '3007'
 ---
 apiVersion: v1
 kind: ServiceAccount
