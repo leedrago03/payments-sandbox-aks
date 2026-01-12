@@ -1,0 +1,13 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: acquirer-simulator
+  namespace: payments-system
+spec:
+  hosts:
+  - acquirer-simulator
+  http:
+  - route:
+    - destination:
+        host: acquirer-simulator
+    timeout: 5s

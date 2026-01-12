@@ -1,0 +1,16 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: tokenization-service
+  namespace: payments-system
+spec:
+  hosts:
+  - tokenization-service
+  http:
+  - route:
+    - destination:
+        host: tokenization-service
+    retries:
+      attempts: 3
+      perTryTimeout: 2s
+      retryOn: gateway-error,connect-failure,refused-stream
