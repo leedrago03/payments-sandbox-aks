@@ -12,7 +12,7 @@ spec:
       name: http
       protocol: HTTP
     hosts:
-    - "*.0	2026-01-12T12:10:24+00:00	363af1b262cd408c88a8906b0324e965	4.145.123.140	Succeeded	None	2026-01-12T12:10:23+00:00.nip.io"
+    - "*.4.145.123.140.nip.io"
 ---
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
@@ -21,7 +21,7 @@ metadata:
   namespace: istio-system
 spec:
   hosts:
-  - "kiali.0	2026-01-12T12:10:24+00:00	363af1b262cd408c88a8906b0324e965	4.145.123.140	Succeeded	None	2026-01-12T12:10:23+00:00.nip.io"
+  - "kiali.4.145.123.140.nip.io"
   gateways:
   - dashboard-gateway
   http:
@@ -38,7 +38,7 @@ metadata:
   namespace: istio-system
 spec:
   hosts:
-  - "grafana.0	2026-01-12T12:10:24+00:00	363af1b262cd408c88a8906b0324e965	4.145.123.140	Succeeded	None	2026-01-12T12:10:23+00:00.nip.io"
+  - "grafana.4.145.123.140.nip.io"
   gateways:
   - dashboard-gateway
   http:
@@ -55,7 +55,7 @@ metadata:
   namespace: istio-system
 spec:
   hosts:
-  - "jaeger.0	2026-01-12T12:10:24+00:00	363af1b262cd408c88a8906b0324e965	4.145.123.140	Succeeded	None	2026-01-12T12:10:23+00:00.nip.io"
+  - "jaeger.4.145.123.140.nip.io"
   gateways:
   - dashboard-gateway
   http:
@@ -72,7 +72,7 @@ metadata:
   namespace: istio-system
 spec:
   hosts:
-  - "argocd.0	2026-01-12T12:10:24+00:00	363af1b262cd408c88a8906b0324e965	4.145.123.140	Succeeded	None	2026-01-12T12:10:23+00:00.nip.io"
+  - "argocd.4.145.123.140.nip.io"
   gateways:
   - dashboard-gateway
   http:
