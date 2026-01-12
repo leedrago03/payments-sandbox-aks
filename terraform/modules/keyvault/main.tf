@@ -41,5 +41,10 @@ resource "azurerm_private_endpoint" "kv_pe" {
     subresource_names              = ["vault"]
   }
 
+  private_dns_zone_group {
+    name                 = "kv-dns-zone-group"
+    private_dns_zone_ids = [var.private_dns_zone_id]
+  }
+
   tags = var.tags
 }

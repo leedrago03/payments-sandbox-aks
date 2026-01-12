@@ -30,8 +30,4 @@ infrastructure-outputs.json
 full-deployment.yaml
 istio-full-install.yaml
 observability-stack.yaml
-grafana.yaml
-jaeger.yaml
-kiali.yaml
-prometheus.yaml
 debug.log

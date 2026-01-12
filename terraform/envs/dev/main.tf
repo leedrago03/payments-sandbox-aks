@@ -57,6 +57,20 @@ resource "azurerm_role_assignment" "aks_acr_pull" {
 data "azurerm_client_config" "current" {}
 
 # Key Vault Module
+resource "azurerm_private_dns_zone" "keyvault_dns" {
+  name                = "privatelink.vaultcore.azure.net"
+  resource_group_name = var.resource_group_name
+  tags                = var.tags
+}
+
+resource "azurerm_private_dns_zone_virtual_network_link" "keyvault_dns_link" {
+  name                  = "link-keyvault-spoke"
+  resource_group_name   = var.resource_group_name
+  private_dns_zone_name = azurerm_private_dns_zone.keyvault_dns.name
+  virtual_network_id    = module.networking.spoke_vnet_id
+  tags                  = var.tags
+}
+
 module "keyvault" {
   source                           = "../../modules/keyvault"
   resource_group_name              = var.resource_group_name
@@ -65,6 +79,7 @@ module "keyvault" {
   tenant_id                        = data.azurerm_client_config.current.tenant_id
   aks_kubelet_identity_object_id   = module.aks.kubelet_identity_object_id
   data_subnet_id                   = module.networking.data_subnet_id
+  private_dns_zone_id              = azurerm_private_dns_zone.keyvault_dns.id
   tags                             = var.tags
 }
 

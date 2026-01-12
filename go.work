@@ -2,12 +2,12 @@ go 1.24.11
 
 use (
 	./pkg
+	./services/acquirer-simulator
+	./services/api-gateway
+	./services/audit-service
+	./services/ledger-service
+	./services/merchant-service
+	./services/payment-service
+	./services/reconciliation-service
 	./services/tokenization-service
-    ./services/payment-service
-    ./services/audit-service
-    ./services/ledger-service
-    ./services/api-gateway
-    ./services/acquirer-simulator
-    ./services/reconciliation-service
-    ./services/merchant-service
 )

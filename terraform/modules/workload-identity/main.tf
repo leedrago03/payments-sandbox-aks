@@ -170,6 +170,13 @@ resource "azurerm_role_assignment" "tokenization_keyvault_crypto" {
   principal_id         = azurerm_user_assigned_identity.tokenization_service.principal_id
 }
 
+# RBAC: Key Vault Secrets User (Tokenization Service)
+resource "azurerm_role_assignment" "tokenization_keyvault_secrets" {
+  scope                = var.keyvault_id
+  role_definition_name = "Key Vault Secrets User"
+  principal_id         = azurerm_user_assigned_identity.tokenization_service.principal_id
+}
+
 # RBAC: Key Vault Secrets User (API Gateway - for JWT signing)
 resource "azurerm_role_assignment" "api_gateway_keyvault_secrets" {
   scope                = var.keyvault_id

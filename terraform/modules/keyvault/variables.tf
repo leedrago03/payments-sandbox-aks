@@ -26,6 +26,11 @@ variable "data_subnet_id" {
   type        = string
 }
 
+variable "private_dns_zone_id" {
+  description = "The ID of the Private DNS Zone for Key Vault"
+  type        = string
+}
+
 variable "tags" {
   type    = map(string)
   default = {}

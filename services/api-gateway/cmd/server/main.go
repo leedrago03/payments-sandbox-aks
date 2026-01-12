@@ -93,6 +93,15 @@ func main() {
 		return proxyWithResilience(c, tokenServiceURL+"/v1/tokenize", tokenBreaker)
 	})
 
+	// Public Merchant Routes (No Auth required for creation/login)
+	app.All("/v1/merchants*", func(c *fiber.Ctx) error {
+		path := c.Path()
+		// Rewrite /v1/... to /api/...
+		// e.g., /v1/merchants -> /api/merchants
+		newPath := "/api" + path[3:]
+		return proxy.Do(c, merchantServiceURL+newPath)
+	})
+
 	app.All("/v1/payments*", authMiddleware, func(c *fiber.Ctx) error {
 		path := c.Path() // /v1/payments...
 		return proxyWithResilience(c, paymentServiceURL+path, paymentBreaker)
