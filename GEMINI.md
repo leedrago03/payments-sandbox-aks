@@ -6,118 +6,62 @@ This `GEMINI.md` provides context for AI agents working on the "Payments Sandbox
 
 **Goal:** Build a production-grade, PCI-inspired B2B payment infrastructure on Azure AKS.
 **Core Philosophy:** "Stripe Lite" — a developer-focused payment gateway and ledger.
-**Status:** Phase 5 (Resilience/GitOps) In Progress. Security Audit Complete: Implemented API Key Auth, Idempotency, and Secret Hardening.
+**Status:** Phase 6 (Resilience Policies) COMPLETE. Phase 7 (Observability & Verification) READY.
+**Key Achievement:** Implemented Istio resilience policies (Retries, Timeouts, Circuit Breakers) for core services.
 
-## 2. Technical Architecture
+## 2. Technical Architecture (Post-Phase 5)
 
-### Stack
-*   **Language:** Go (Fiber framework) for all backend services.
-*   **Frontend:** React (Admin Dashboard - Planned).
-*   **Database:** PostgreSQL (Azure Database for PostgreSQL in prod, Docker containers locally).
-*   **Infrastructure:** Terraform (Azure VNet, AKS, Key Vault, Event Hubs).
-*   **Orchestration:** Kubernetes (AKS), Istio Service Mesh (Strict mTLS).
-*   **Security:** Network Policies (Zero Trust), Azure Workload Identity.
-*   **Observability:** Prometheus, Grafana, Kiali, Jaeger.
+### Stack Updates
+*   **GitOps:** ArgoCD manages the cluster via two streams: `platform-infra` and `payments-platform`.
+*   **Service Mesh:** Istio (Strict mTLS) with standardized port naming (`http-api`) for L7 metrics/tracing.
+*   **Identity:** Azure Workload Identity for all services.
+*   **KMS:** `pkg/crypto` refactored to use Key Vault **Secrets** for Symmetric AES keys (compatible with Standard tier).
 
 ### Microservices Map
-| Service | Port | Description | Status |
-| :--- | :--- | :--- | :--- |
-| **API Gateway** | 8000 | Entry point, routing, auth. Go Fiber. | ✅ Running (Istio Ingress) |
-| **Payment Service** | 8081 | Orchestrates payment flow (Auth/Capture). | ✅ Running (Strict mTLS) |
-| **Tokenization** | 3003 | Handles sensitive PAN data. PCI scope boundary. | ✅ Running (Strict mTLS) |
-| **Ledger Service** | 3005 | Double-entry bookkeeping. | ✅ Running (Redis Consumer) |
-| **Audit Service** | 3006 | Immutable logs (HMAC signed). | ✅ Running (Redis Consumer) |
-| **Acquirer Sim** | 3004 | Simulates bank responses. | ✅ Running |
-| **Reconciliation**| 3007 | Batch settlement verification. | ✅ Running |
+All services use port `http-api` for Istio compatibility.
+| Service | Internal Port | Description |
+| :--- | :--- | :--- |
+| **API Gateway** | 3000 (Svc 80) | Entry point, routing, auth, circuit breakers. |
+| **Payment Service** | 8081 | Orchestrates payment flow (Auth/Capture). |
+| **Tokenization** | 3003 | Handles sensitive PAN data. Uses KV Secret. |
+| **Ledger Service** | 3005 | Double-entry bookkeeping. |
+| **Audit Service** | 3006 | Immutable logs (HMAC signed). |
+| **Merchant Service**| 3002 | Merchant and API Key management. |
+| **Acquirer Sim** | 3004 | Simulates bank responses. |
+| **Reconciliation**| 3007 | Batch settlement verification. |
 
 ## 3. Master Recovery Plan (Cold Start Guide)
 
-**CRITICAL:** Follow these steps precisely to restore the full environment after a `terraform destroy`.
+**CRITICAL:** Follow these steps to restore the environment after a `terraform destroy`.
 
-### Phase 1: Infrastructure Provisioning
-1.  **Deploy:** Run `terraform apply` in `terraform/envs/dev`.
-2.  **Outputs:** Save outputs to `infrastructure-outputs.json`.
-    ```bash
-    terraform output -json > ../../../infrastructure-outputs.json
-    ```
+### Phase 1: Infrastructure
+1.  **Deploy:** Run `terraform apply -var-file="dev.tfvars"` in `terraform/envs/dev`.
+2.  **Outputs:** Save outputs: `terraform output -json > ../../../infrastructure-outputs.json`.
 
-### Phase 2: Configuration & Build
-1.  **Update Manifests:**
-    *   Edit `k8s-manifests/overlays/dev-aks/kustomization.yaml`: Update `images` with the new ACR name.
-    *   Edit `k8s-manifests/overlays/dev-aks/deployment-patch.yaml`: Update **ALL** `AZURE_CLIENT_ID` values and the `image` registry reference.
-    *   Edit `k8s-manifests/overlays/dev-aks/configmap-patch.yaml`: Update `DB_HOST`, `REDIS_ADDR`, `KEYVAULT_URI` with new values.
-2.  **Build & Push:**
-    ```bash
-    az aks get-credentials ...
-    ./build-and-push.sh <NEW_ACR_NAME>
-    ```
+### Phase 2: Cluster Bootstrapping (Manual Glue)
+*Use `az aks command invoke` for these commands.*
 
-### Phase 3: Cluster Bootstrapping (The "Manual" Glue)
-*Use `az aks command invoke` for all kubectl commands.*
+1.  **Create Namespaces:** `argocd`, `payments-system`, `payments-data`, `istio-system`.
+2.  **Initialize Databases:** Run a `postgres:alpine` pod to create: `merchants`, `tokenization`, `ledger`, `audit`, `reconciliation`.
+3.  **Seed Kubernetes Secrets:** 
+    *   `postgresql-credentials` (username, password, host, port, sslmode).
+    *   `redis-credentials` (password).
+    *   `audit-secrets` (AUDIT_HMAC_KEY).
+4.  **Seed Key Vault Secret:** Create a Secret (not Key) named `payment-encryption-key` in Key Vault with a 32-byte base64 string.
 
-1.  **Initialize Databases:**
-    *   Terraform ONLY creates the `payments` DB. You must create the others.
-    *   Command: `kubectl run db-init --image=postgres:alpine ...` (Use the script pattern to create `ledger`, `audit`, `tokenization`, `merchants`, `reconciliation`).
-2.  **Seed Kubernetes Secrets:**
-    *   Create `postgresql-credentials` and `redis-credentials` in `payments-system` namespace.
-    *   Values: Fetch `redis_primary_access_key` from Azure CLI or Terraform state.
-
-### Phase 4: Platform Layer (Istio & Observability)
-1.  **Install Istio:**
-    *   Use `helm template` locally to generate `istio-full-install.yaml` (base + istiod + ingress).
-    *   Apply to cluster.
-2.  **Install Observability:**
-    *   Download standard addons (Prometheus, Kiali, Grafana, Jaeger) from Istio repo.
-    *   Apply to `istio-system`.
-
-### Phase 5: Application Deployment
-1.  **Deploy:**
-    ```bash
-    kubectl kustomize k8s-manifests/overlays/dev-aks > full-deployment.yaml
-    az aks command invoke ... --command "kubectl apply -f full-deployment.yaml"
-    ```
-2.  **Enable Mesh:**
-    *   Label namespace: `kubectl label namespace payments-system istio-injection=enabled`.
-    *   Restart deployments to inject sidecars.
-
-### Phase 6: Security Hardening
-1.  **mTLS:** Apply `istio/security/peer-authentication.yaml` and `istio/destinationrules/default-tls.yaml`.
-2.  **Network Policies:** Apply `policies/networkpolicies/payments-system-policy.yaml`.
-
-### Phase 7: Verification
-1.  **Load Test:** Run the traffic generator loop (curl) inside a test pod in `payments-system`.
-2.  **Verify:** Check `payment-service` logs for "Event published" and `ledger-service` API for balance updates.
+### Phase 3: GitOps Activation
+1.  **ArgoCD Install:** Apply the official install manifest to the `argocd` namespace.
+2.  **Infrastructure App:** Apply `k8s-manifests/argocd-infra.yaml`. Wait for Istio pods to be `Running`.
+3.  **Application App:** Apply `k8s-manifests/argocd-app.yaml`. This will deploy all 8 services.
 
 ## 4. Key Directives for AI Agents
 
-1.  **Go Standardization:** All backend code MUST be Go 1.24+ using Fiber v2.
-2.  **Security First:** Use `azidentity` for Azure Auth. **SSL (require)** is mandatory for DB connections in Azure.
-3.  **Monorepo Build:** Docker builds MUST run from the root context.
-4.  **Private Cluster:** Do not attempt direct `kubectl` calls; use `az aks command invoke`.
+1.  **Port Naming:** Service ports MUST be named `http-api` (or start with `http-`) or tracing/metrics will fail.
+2.  **Workload Identity:** New deployments MUST include the `azure.workload.identity/use: "true"` label and reference a ServiceAccount with the `azure.workload.identity/client-id` annotation.
+3.  **Monorepo Build:** Docker builds MUST run from the root context using `build-and-push.sh`.
+4.  **Private Cluster:** Use `az aks command invoke` for all `kubectl` operations.
 
-## 5. Directory Structure
-```
-/
-├── apps/               # Frontend applications
-├── ci-cd/              # CI/CD pipelines
-├── k8s-manifests/      # Kubernetes YAMLs
-│   ├── base/           # Base resources
-│   └── overlays/       # Env-specific patches (CRITICAL: Update these on reset)
-├── istio/              # Service Mesh Configs
-│   ├── security/       # PeerAuthentication
-│   ├── gateways/       # Ingress/Egress Gateways
-│   └── destinationrules/ # mTLS settings
-├── pkg/                # Shared Go Libraries
-├── policies/           # Security Policies
-│   └── networkpolicies/ # K8s NetworkPolicies (Zero Trust)
-├── services/           # Microservices
-├── terraform/          # Infrastructure as Code
-└── build-and-push.sh   # Build script
-```
-
-## 6. Security Architecture Changes (Post-Audit)
-*   **Authentication:** API Gateway now enforces `X-API-Key` validation by calling `merchant-service` internal endpoint.
-*   **API Keys:** Switched from bcrypt to **SHA256** for performance/lookup efficiency.
-*   **Idempotency:** `payment-service` uses Redis to enforce exactly-once processing via `Idempotency-Key` header.
-*   **Secrets:** All service configs now **panic** if critical secrets (DB passwords, Keys) are missing. Default values like `postgres123` have been purged from code.
-*   **Crypto:** Hardcoded fallback keys in `pkg/crypto` have been removed. Services require valid Azure Key Vault URI or explicit configuration.
+## 5. Security Architecture
+*   **mTLS:** Enforced via `PeerAuthentication` (Strict).
+*   **Vault Access:** Identity `id-tokenization-service-dev` requires `Key Vault Secrets User` role on the vault.
+*   **Ingress:** Dashboards are exposed via `dashboard-gateway` using `nip.io` subdomains on the Public Ingress IP.
