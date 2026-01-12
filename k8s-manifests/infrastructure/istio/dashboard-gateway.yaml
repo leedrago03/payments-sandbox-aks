@@ -90,3 +90,7 @@ spec:
         host: argocd-server.argocd.svc.cluster.local
         port:
           number: 80
+      headers:
+        request:
+          set:
+            X-Forwarded-Proto: https
