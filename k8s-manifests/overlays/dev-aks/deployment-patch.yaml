@@ -7,14 +7,14 @@ spec:
   template:
     metadata:
       labels:
-        azure.workload.identity/use: "true"
+        azure.workload.identity/use: 'true'
     spec:
       containers:
       - name: payment-service
         image: acrpaymentsdev84bwov.azurecr.io/payments-sandbox/payment-service:latest
         env:
         - name: AZURE_CLIENT_ID
-          value: "c43b3f46-fba8-4e3e-99b3-93d43051ae80"
+          value: a11a7c88-abae-4064-b84d-90750b29c01b
         - name: DB_USER
           valueFrom:
             secretKeyRef:
@@ -31,9 +31,9 @@ spec:
               name: postgresql-credentials
               key: host
         - name: DB_NAME
-          value: "payments"
+          value: payments
         - name: DB_SSLMODE
-          value: "require"
+          value: require
         - name: REDIS_PASSWORD
           valueFrom:
             secretKeyRef:
@@ -49,14 +49,14 @@ spec:
   template:
     metadata:
       labels:
-        azure.workload.identity/use: "true"
+        azure.workload.identity/use: 'true'
     spec:
       containers:
       - name: audit-service
         image: acrpaymentsdev84bwov.azurecr.io/payments-sandbox/audit-service:latest
         env:
         - name: AZURE_CLIENT_ID
-          value: "e2fb3ff1-04d7-4e8c-875f-dd63d8d5e198"
+          value: 169f16ce-47d1-4a62-858c-87e047a6deb1
         - name: DB_USER
           valueFrom:
             secretKeyRef:
@@ -68,7 +68,7 @@ spec:
               name: postgresql-credentials
               key: password
         - name: DB_SSLMODE
-          value: "require"
+          value: require
         - name: REDIS_PASSWORD
           valueFrom:
             secretKeyRef:
@@ -89,14 +89,14 @@ spec:
   template:
     metadata:
       labels:
-        azure.workload.identity/use: "true"
+        azure.workload.identity/use: 'true'
     spec:
       containers:
       - name: ledger-service
         image: acrpaymentsdev84bwov.azurecr.io/payments-sandbox/ledger-service:latest
         env:
         - name: AZURE_CLIENT_ID
-          value: "e62ce72b-4796-465c-9b1d-d39f339f9eda"
+          value: 83d5af08-ec00-4c7c-90ab-44b284e41238
         - name: DB_USER
           valueFrom:
             secretKeyRef:
@@ -108,7 +108,7 @@ spec:
               name: postgresql-credentials
               key: password
         - name: DB_SSLMODE
-          value: "require"
+          value: require
         - name: REDIS_PASSWORD
           valueFrom:
             secretKeyRef:
@@ -124,14 +124,14 @@ spec:
   template:
     metadata:
       labels:
-        azure.workload.identity/use: "true"
+        azure.workload.identity/use: 'true'
     spec:
       containers:
       - name: tokenization-service
         image: acrpaymentsdev84bwov.azurecr.io/payments-sandbox/tokenization-service:latest
         env:
         - name: AZURE_CLIENT_ID
-          value: "316c2b37-c4d2-4577-bdeb-47cdb0f47692"
+          value: f419a134-a73b-47ba-8594-8b690f5d5bb7
         - name: DB_USER
           valueFrom:
             secretKeyRef:
@@ -148,13 +148,13 @@ spec:
               name: postgresql-credentials
               key: host
         - name: DB_NAME
-          value: "tokenization"
+          value: tokenization
         - name: DB_SSLMODE
-          value: "require"
+          value: require
         - name: AZURE_KEY_VAULT_URI
-          value: "https://kv-payments-84bwov.vault.azure.net/"
+          value: https://kv-payments-84bwov.vault.azure.net/
         - name: AZURE_KEY_NAME
-          value: "payment-encryption-key"
+          value: payment-encryption-key
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -165,14 +165,14 @@ spec:
   template:
     metadata:
       labels:
-        azure.workload.identity/use: "true"
+        azure.workload.identity/use: 'true'
     spec:
       containers:
       - name: merchant-service
         image: acrpaymentsdev84bwov.azurecr.io/payments-sandbox/merchant-service:latest
         env:
         - name: AZURE_CLIENT_ID
-          value: "11ffd129-a2da-4e41-959e-37d127f365d1"
+          value: aea19a9f-3087-43ad-979b-a627a531bc3b
         - name: DB_USER
           valueFrom:
             secretKeyRef:
@@ -189,9 +189,9 @@ spec:
               name: postgresql-credentials
               key: host
         - name: DB_NAME
-          value: "merchants"
+          value: merchants
         - name: DB_SSLMODE
-          value: "require"
+          value: require
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -202,14 +202,14 @@ spec:
   template:
     metadata:
       labels:
-        azure.workload.identity/use: "true"
+        azure.workload.identity/use: 'true'
     spec:
       containers:
       - name: acquirer-simulator
         image: acrpaymentsdev84bwov.azurecr.io/payments-sandbox/acquirer-simulator:latest
         env:
         - name: AZURE_CLIENT_ID
-          value: "e3b8f8ac-84b6-4a6d-9c6c-17b08ee8d1f3"
+          value: 5125f579-bc77-4f10-bc4b-17aa6d2d04b2
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -220,14 +220,14 @@ spec:
   template:
     metadata:
       labels:
-        azure.workload.identity/use: "true"
+        azure.workload.identity/use: 'true'
     spec:
       containers:
       - name: reconciliation-service
         image: acrpaymentsdev84bwov.azurecr.io/payments-sandbox/reconciliation-service:latest
         env:
         - name: AZURE_CLIENT_ID
-          value: "7c739f54-ccfe-4576-ab0d-8037b75231e4"
+          value: 417c95f9-5576-4f2c-a927-47cedf7f3af3
         - name: DB_USER
           valueFrom:
             secretKeyRef:
@@ -244,9 +244,9 @@ spec:
               name: postgresql-credentials
               key: host
         - name: DB_NAME
-          value: "reconciliation"
+          value: reconciliation
         - name: DB_SSLMODE
-          value: "require"
+          value: require
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -257,11 +257,11 @@ spec:
   template:
     metadata:
       labels:
-        azure.workload.identity/use: "true"
+        azure.workload.identity/use: 'true'
     spec:
       containers:
       - name: api-gateway
         image: acrpaymentsdev84bwov.azurecr.io/payments-sandbox/api-gateway:latest
         env:
         - name: AZURE_CLIENT_ID
-          value: "50be3583-7131-400a-a9c3-d2ade47c97da"
+          value: fb9aa8e3-9ec0-4efa-a648-b3869232c9ae
