@@ -11,7 +11,6 @@ spec:
     spec:
       containers:
       - name: payment-service
-        image: acrpaymentsdev84bwov.azurecr.io/payments-sandbox/payment-service:latest
         env:
         - name: AZURE_CLIENT_ID
           value: a11a7c88-abae-4064-b84d-90750b29c01b
@@ -53,7 +52,6 @@ spec:
     spec:
       containers:
       - name: audit-service
-        image: acrpaymentsdev84bwov.azurecr.io/payments-sandbox/audit-service:latest
         env:
         - name: AZURE_CLIENT_ID
           value: 169f16ce-47d1-4a62-858c-87e047a6deb1
@@ -93,7 +91,6 @@ spec:
     spec:
       containers:
       - name: ledger-service
-        image: acrpaymentsdev84bwov.azurecr.io/payments-sandbox/ledger-service:latest
         env:
         - name: AZURE_CLIENT_ID
           value: 83d5af08-ec00-4c7c-90ab-44b284e41238
@@ -128,7 +125,6 @@ spec:
     spec:
       containers:
       - name: tokenization-service
-        image: acrpaymentsdev84bwov.azurecr.io/payments-sandbox/tokenization-service:latest
         env:
         - name: AZURE_CLIENT_ID
           value: f419a134-a73b-47ba-8594-8b690f5d5bb7
@@ -169,7 +165,6 @@ spec:
     spec:
       containers:
       - name: merchant-service
-        image: acrpaymentsdev84bwov.azurecr.io/payments-sandbox/merchant-service:latest
         env:
         - name: AZURE_CLIENT_ID
           value: aea19a9f-3087-43ad-979b-a627a531bc3b
@@ -206,7 +201,6 @@ spec:
     spec:
       containers:
       - name: acquirer-simulator
-        image: acrpaymentsdev84bwov.azurecr.io/payments-sandbox/acquirer-simulator:latest
         env:
         - name: AZURE_CLIENT_ID
           value: 5125f579-bc77-4f10-bc4b-17aa6d2d04b2
@@ -224,7 +218,6 @@ spec:
     spec:
       containers:
       - name: reconciliation-service
-        image: acrpaymentsdev84bwov.azurecr.io/payments-sandbox/reconciliation-service:latest
         env:
         - name: AZURE_CLIENT_ID
           value: 417c95f9-5576-4f2c-a927-47cedf7f3af3
@@ -261,7 +254,6 @@ spec:
     spec:
       containers:
       - name: api-gateway
-        image: acrpaymentsdev84bwov.azurecr.io/payments-sandbox/api-gateway:latest
         env:
         - name: AZURE_CLIENT_ID
           value: fb9aa8e3-9ec0-4efa-a648-b3869232c9ae
