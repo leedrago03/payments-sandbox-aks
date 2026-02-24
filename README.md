@@ -90,5 +90,3 @@ Based on [Azure AKS Secure Baseline](https://learn.microsoft.com/en-us/azure/arc
 - **Observability:** Prometheus, Grafana, Jaeger, Kiali
 - **Languages:** Go (1.21+), React/TypeScript
 
-## License
-MIT (for portfolio/learning purposes)
