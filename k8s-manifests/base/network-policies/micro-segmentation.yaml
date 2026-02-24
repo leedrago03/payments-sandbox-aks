@@ -1,0 +1,133 @@
+# PCI-Inspired Micro-Segmentation Policy
+# This policy replaces the broad "allow-all-internal" rule with a "Principle of Least Privilege" model.
+
+---
+# 1. API Gateway: The Entrance
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: api-gateway-policy
+  namespace: payments-system
+spec:
+  podSelector:
+    matchLabels:
+      app: api-gateway
+  policyTypes: [Ingress, Egress]
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: istio-system
+  egress:
+  - to: # To Downstream Services
+    - podSelector:
+        matchLabels:
+          app: payment-service
+  - to:
+    - podSelector:
+        matchLabels:
+          app: tokenization-service
+  - to:
+    - podSelector:
+        matchLabels:
+          app: merchant-service
+  - to:
+    - podSelector:
+        matchLabels:
+          app: reconciliation-service
+  - to: # DNS
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: kube-system
+
+---
+# 2. Payment Service: The Orchestrator
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: payment-service-policy
+  namespace: payments-system
+spec:
+  podSelector:
+    matchLabels:
+      app: payment-service
+  policyTypes: [Ingress, Egress]
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: api-gateway
+  egress:
+  - to: # To Security Components
+    - podSelector:
+        matchLabels:
+          app: tokenization-service
+  - to: # To Bank Simulation
+    - podSelector:
+        matchLabels:
+          app: acquirer-simulator
+  - to: # To Data Subnet (Redis)
+    - ipBlock:
+        cidr: 10.1.3.0/24
+  - to: # DNS
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: kube-system
+
+---
+# 3. Tokenization Service: The Vault Gatekeeper (Highest Security)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: tokenization-service-policy
+  namespace: payments-system
+spec:
+  podSelector:
+    matchLabels:
+      app: tokenization-service
+  policyTypes: [Ingress, Egress]
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: api-gateway
+  - from:
+    - podSelector:
+        matchLabels:
+          app: payment-service
+  egress:
+  - to: # To Postgres Subnet
+    - ipBlock:
+        cidr: 10.1.4.0/24
+  - to: # To Data Subnet (Key Vault)
+    - ipBlock:
+        cidr: 10.1.3.0/24
+  - to: # DNS
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: kube-system
+
+---
+# 4. Data Consumers (Ledger & Audit)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: data-consumers-policy
+  namespace: payments-system
+spec:
+  podSelector:
+    matchExpressions:
+      - {key: app, operator: In, values: [ledger-service, audit-service]}
+  policyTypes: [Ingress, Egress]
+  # Inbound is purely via Redis/EventHub (Egress initiated)
+  egress:
+  - to: # To Postgres Subnet
+    - ipBlock:
+        cidr: 10.1.4.0/24
+  - to: # To Redis Subnet
+    - ipBlock:
+        cidr: 10.1.3.0/24
+  - to: # DNS
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: kube-system

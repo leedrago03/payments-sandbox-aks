@@ -10,6 +10,7 @@ resources:
 - ../../base/acquirer-simulator
 - ../../base/reconciliation-service
 - ../../base/api-gateway
+- ../../base/network-policies/micro-segmentation.yaml
 patchesStrategicMerge:
 - configmap-patch.yaml
 - deployment-patch.yaml
