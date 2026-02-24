@@ -5,21 +5,24 @@ This `GEMINI.md` provides the authoritative context for AI agents working on the
 ## 1. Project Overview
 **Goal:** Build a production-grade, PCI-inspired B2B payment infrastructure on Azure AKS.
 **Core Philosophy:** "Stripe Lite" — Secure, Event-Driven, and Resilient.
-**Status:** Phase 6 (Resilience) COMPLETE. Phase 7 (Verification & Observability) IN-PROGRESS.
-**Key Achievement:** Implemented "One-Shot" Enterprise Bootstrap; verified mesh resilience via stress and chaos testing.
+**Status:** 
+*   ✅ Phase 6 (Resilience) COMPLETE.
+*   ✅ Phase 7 (Verification & Observability) COMPLETE.
+*   ✅ Phase 8 (Security Hardening) COMPLETE.
 
-## 2. Technical Architecture (Post-Phase 7 Refactor)
+## 2. Technical Architecture
 
-### Standardized Manifest Structure
-To prevent configuration drift and "patching hell," the following rules are enforced:
-*   **Base Manifests (`k8s-manifests/base`):** MUST use placeholder images (e.g., `image: payment-service`) and generic service names. No environment-specific URLs or Client IDs.
-*   **Overlay Manifests (`k8s-manifests/overlays/dev-aks`):** Use `kustomization.yaml` to replace images.
-*   **Patches (`deployment-patch.yaml`):** MUST NOT contain `image:` fields. Use only for environment-specific metadata like `AZURE_CLIENT_ID` or specific labels.
+### Observability Stack (Phase 7 Finalized)
+*   **Distributed Tracing:** Implemented via OpenTelemetry + B3 Propagation. All Go services propagate `X-B3` headers.
+*   **Istio Mesh:** Configured with `Telemetry` CRD for 100% Zipkin-style sampling.
+*   **Dashboards:** Kiali, Grafana, and Jaeger accessible via Istio Ingress with fixed RBAC and SSL redirect logic.
 
-### Automation Tooling
-*   `scripts/configure-manifests.py`: Automatically syncs `infrastructure-outputs.json` (from Terraform) into K8s manifests (URIs, Client IDs).
-*   `scripts/bootstrap-cluster.sh`: The "Enterprise One-Shot" script. Sets namespaces, seeds secrets, initializes 5 logical DBs, and configures Key Vault.
-*   `scripts/configure-ingress.sh`: Dynamically detects LoadBalancer IP and updates `nip.io` ingress routes for dashboards.
+### Security Architecture (Phase 8 Hardened)
+*   **Micro-Segmentation:** Fine-grained `NetworkPolicy` per service. Default-deny with explicit whitelisting of neighbors (e.g., Gateway -> Payment only).
+*   **Pod Hardening:** All deployments enforce `readOnlyRootFilesystem: true` with `emptyDir` mounts for `/tmp`.
+*   **mTLS:** Enforced (Strict) across `payments-system`.
+*   **Workload Identity:** Azure identities mapped to K8s ServiceAccounts.
+*   **KMS:** Tokenization service uses AES-256 Symmetric keys stored as **Secrets** in Azure Key Vault.
 
 ---
 
@@ -46,20 +49,15 @@ chmod +x scripts/bootstrap-cluster.sh
 
 ---
 
-## 4. Current State & Known Issues (Phase 7)
+## 4. Current State & Verified Capabilities
 
 ### Verified Capabilities
-*   **Resilience:** System verified to handle 100 concurrent requests.
-*   **Chaos Handling:** Fault injection (50% error rate on Acquirer) confirmed that `payment-service` handles upstream failures gracefully without cascading crashes.
-*   **Connectivity:** All 8 services are Running (2/2) with Istio sidecars. Public access via Ingress Gateway (Port 80/443) is enabled.
+*   **Zero-Trust Mesh:** Strict isolation between simulation and production namespaces.
+*   **End-to-End Tracing:** Complete request waterfall from Gateway -> Payment -> Acquirer.
+*   **ArgoCD:** Stable ingress without redirect loops.
+*   **Resilience:** System verified to handle 100 concurrent requests with graceful degradation.
 
-### Open Issues (Continue from here)
-1.  **ArgoCD (`ERR_TOO_MANY_REDIRECTS`):** Despite `--insecure` flag and `X-Forwarded-Proto` header injection, the redirect loop between Gateway (SSL) and ArgoCD (Plain) persists. Needs deeper Envoy filter or ArgoCD config map audit.
-2.  **Jaeger (Empty Traces):** Zipkin enabled in MeshConfig and workloads restarted, but application spans (API Gateway -> Payment) are still missing. Likely requires `telemetry` CRD configuration or header propagation verification in Go code.
-3.  **Kiali Permissions:** Occasional "Forbidden" errors when fetching deployment status. Needs ClusterRole check.
-
-## 5. Security Architecture
-*   **mTLS:** Enforced (Strict) across `payments-system`.
-*   **Workload Identity:** Azure identities mapped to K8s ServiceAccounts.
-*   **KMS:** Tokenization service uses AES-256 Symmetric keys stored as **Secrets** in Azure Key Vault (Standard Tier).
-*   **Networking:** Port 443 (HTTPS), 80 (HTTP), and 3000 (Gateway) allowed via `nsg-aks-dev`.
+### Open Items (Phase 9 - Future)
+1.  **Secret Rotation:** Implement automated rotation for the AES-256 keys in Key Vault via Azure Functions or KEDA.
+2.  **Compliance Audit Logs:** Enhance `audit-service` to generate PCI-ready reports.
+3.  **Cross-Region Failover:** Explore Azure Traffic Manager for multi-region GSLB.
