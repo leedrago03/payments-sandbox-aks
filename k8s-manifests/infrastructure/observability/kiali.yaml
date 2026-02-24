@@ -219,6 +219,21 @@ rules:
   - list
   - watch
   - patch
+- apiGroups: ["autoscaling"]
+  resources:
+  - horizontalpodautoscalers
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups: ["networking.k8s.io"]
+  resources:
+  - ingresses
+  - networkpolicies
+  verbs:
+  - get
+  - list
+  - watch
 - apiGroups:
   - networking.istio.io
   - security.istio.io

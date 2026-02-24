@@ -85,6 +85,10 @@ spec:
   gateways:
   - dashboard-gateway
   http:
+  - match:
+    - port: 80
+    redirect:
+      scheme: https
   - route:
     - destination:
         host: argocd-server.argocd.svc.cluster.local
@@ -94,3 +98,4 @@ spec:
         request:
           set:
             X-Forwarded-Proto: https
+            X-Forwarded-Port: "443"

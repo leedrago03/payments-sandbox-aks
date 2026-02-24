@@ -12,9 +12,13 @@ import (
     "github.com/gofiber/fiber/v2/middleware/cors"
     "github.com/gofiber/fiber/v2/middleware/logger"
     "github.com/gofiber/fiber/v2/middleware/recover"
+    "github.com/payments-sandbox/pkg/logging"
 )
 
 func main() {
+    // Initialize Tracing
+    logging.InitTracing()
+
     // Load configuration
     cfg, err := config.Load()
     if err != nil {
@@ -41,6 +45,14 @@ func main() {
     
     // Middleware
     app.Use(recover.New())
+    
+    // Tracing Middleware: Extract trace from incoming request and pass to context
+    app.Use(func(c *fiber.Ctx) error {
+        ctx := logging.ExtractTraceFromFastHTTP(c.UserContext(), &c.Request().Header)
+        c.SetUserContext(ctx)
+        return c.Next()
+    })
+
     app.Use(logger.New())
     app.Use(cors.New())
     

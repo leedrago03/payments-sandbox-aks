@@ -2,23 +2,26 @@ package integration
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
+
+	"github.com/payments-sandbox/pkg/logging"
 )
 
 type AcquirerClient struct {
 	baseURL    string
-	httpClient *http.Client
+	httpClient *logging.TraceAwareClient
 }
 
 func NewAcquirerClient(baseURL string) *AcquirerClient {
 	return &AcquirerClient{
 		baseURL: baseURL,
-		httpClient: &http.Client{
+		httpClient: logging.NewTraceAwareClient(&http.Client{
 			Timeout: 10 * time.Second,
-		},
+		}),
 	}
 }
 
@@ -35,13 +38,19 @@ type AuthResponse struct {
 	AuthCode      string `json:"auth_code"`
 }
 
-func (c *AcquirerClient) Authorize(req AuthRequest) (*AuthResponse, error) {
+func (c *AcquirerClient) Authorize(ctx context.Context, req AuthRequest) (*AuthResponse, error) {
 	jsonData, err := json.Marshal(req)
 	if err != nil {
 		return nil, err
 	}
 
-	resp, err := c.httpClient.Post(fmt.Sprintf("%s/api/acquirer/authorize", c.baseURL), "application/json", bytes.NewBuffer(jsonData))
+	httpReq, err := http.NewRequestWithContext(ctx, "POST", fmt.Sprintf("%s/api/acquirer/authorize", c.baseURL), bytes.NewBuffer(jsonData))
+	if err != nil {
+		return nil, err
+	}
+	httpReq.Header.Set("Content-Type", "application/json")
+
+	resp, err := c.httpClient.Do(httpReq)
 	if err != nil {
 		return nil, err
 	}

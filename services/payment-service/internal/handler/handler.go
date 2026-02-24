@@ -29,7 +29,7 @@ func (h *PaymentHandler) AuthorizePayment(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request"})
 	}
 
-	payment, err := h.service.Authorize(c.Context(), &req)
+	payment, err := h.service.Authorize(c.UserContext(), &req)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}

@@ -21,3 +21,5 @@ require (
 	github.com/valyala/tcplisten v1.0.0 // indirect
 	golang.org/x/sys v0.36.0 // indirect
 )
+
+replace github.com/payments-sandbox/pkg => ../../pkg

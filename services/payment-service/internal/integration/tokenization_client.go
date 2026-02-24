@@ -2,23 +2,26 @@ package integration
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
+
+	"github.com/payments-sandbox/pkg/logging"
 )
 
 type TokenizationClient struct {
 	baseURL    string
-	httpClient *http.Client
+	httpClient *logging.TraceAwareClient
 }
 
 func NewTokenizationClient(baseURL string) *TokenizationClient {
 	return &TokenizationClient{
 		baseURL: baseURL,
-		httpClient: &http.Client{
+		httpClient: logging.NewTraceAwareClient(&http.Client{
 			Timeout: 10 * time.Second,
-		},
+		}),
 	}
 }
 
@@ -38,13 +41,19 @@ type TokenizeResponse struct {
 	ExpiryYear  int    `json:"expiry_year"`
 }
 
-func (c *TokenizationClient) Tokenize(req TokenizeRequest) (*TokenizeResponse, error) {
+func (c *TokenizationClient) Tokenize(ctx context.Context, req TokenizeRequest) (*TokenizeResponse, error) {
 	jsonData, err := json.Marshal(req)
 	if err != nil {
 		return nil, err
 	}
 
-	resp, err := c.httpClient.Post(fmt.Sprintf("%s/v1/tokenize", c.baseURL), "application/json", bytes.NewBuffer(jsonData))
+	httpReq, err := http.NewRequestWithContext(ctx, "POST", fmt.Sprintf("%s/v1/tokenize", c.baseURL), bytes.NewBuffer(jsonData))
+	if err != nil {
+		return nil, err
+	}
+	httpReq.Header.Set("Content-Type", "application/json")
+
+	resp, err := c.httpClient.Do(httpReq)
 	if err != nil {
 		return nil, err
 	}

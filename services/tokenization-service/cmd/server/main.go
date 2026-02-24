@@ -8,15 +8,21 @@ import (
 	"tokenization-service/config"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/gofiber/fiber/v2/middleware/recover"
 	_ "github.com/lib/pq"
 
 	"github.com/payments-sandbox/pkg/crypto"
+	"github.com/payments-sandbox/pkg/logging"
 	"tokenization-service/internal/handler"
 	"tokenization-service/internal/repository"
 	"tokenization-service/internal/service"
 )
 
 func main() {
+	// Initialize Tracing
+	logging.InitTracing()
+
 	cfg, err := config.Load()
 	if err != nil {
 		log.Fatalf("failed to load config: %v", err)
@@ -72,6 +78,17 @@ func main() {
 
 	// Create Fiber app
 	app := fiber.New()
+
+	app.Use(recover.New())
+	
+	// Tracing Middleware: Extract trace from incoming request and pass to context
+	app.Use(func(c *fiber.Ctx) error {
+		ctx := logging.ExtractTraceFromFastHTTP(c.UserContext(), &c.Request().Header)
+		c.SetUserContext(ctx)
+		return c.Next()
+	})
+
+	app.Use(logger.New())
 
 	// Register routes
 	tokenHandler.RegisterRoutes(app)

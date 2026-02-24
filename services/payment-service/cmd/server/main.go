@@ -15,6 +15,9 @@ import (
 )
 
 func main() {
+	// Initialize Tracing
+	logging.InitTracing()
+
 	logger, err := logging.NewLogger("payment-service")
 	if err != nil {
 		panic(err)
@@ -76,6 +79,13 @@ func main() {
 	
 	app := fiber.New()
 	
+	// Tracing Middleware: Extract trace from incoming request and pass to context
+	app.Use(func(c *fiber.Ctx) error {
+		ctx := logging.ExtractTraceFromFastHTTP(c.UserContext(), &c.Request().Header)
+		c.SetUserContext(ctx)
+		return c.Next()
+	})
+
 	h := handler.NewPaymentHandler(paymentSvc)
 	h.RegisterRoutes(app)
 

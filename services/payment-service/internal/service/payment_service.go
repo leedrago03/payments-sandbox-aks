@@ -92,7 +92,7 @@ func (s *PaymentService) Authorize(ctx context.Context, req *model.CreatePayment
 
 	// 2. Call Acquirer
 	result, err := s.breaker.Execute(func() (interface{}, error) {
-		return s.acquirerClient.Authorize(integration.AuthRequest{
+		return s.acquirerClient.Authorize(ctx, integration.AuthRequest{
 			Amount:     req.Amount,
 			Currency:   req.Currency,
 			CardToken:  token,

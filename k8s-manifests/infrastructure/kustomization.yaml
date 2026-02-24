@@ -6,6 +6,7 @@ resources:
   - istio/02-istiod.yaml
   - istio/03-ingress.yaml
   - istio/dashboard-gateway.yaml
+  - istio/telemetry.yaml
   - observability/prometheus.yaml
   - observability/kiali.yaml
   - observability/jaeger.yaml

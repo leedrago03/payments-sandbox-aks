@@ -9,13 +9,24 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/proxy"
+	"github.com/payments-sandbox/pkg/logging"
 	"github.com/payments-sandbox/pkg/resilience"
 	"github.com/sony/gobreaker"
 	"api-gateway/internal/middleware"
 )
 
 func main() {
+	// Initialize Tracing
+	logging.InitTracing()
+
 	app := fiber.New()
+
+	// Tracing Middleware: Extract trace from incoming request and pass to context
+	app.Use(func(c *fiber.Ctx) error {
+		ctx := logging.ExtractTraceFromFastHTTP(c.UserContext(), &c.Request().Header)
+		c.SetUserContext(ctx)
+		return c.Next()
+	})
 
 	app.Use(logger.New())
 
@@ -62,6 +73,9 @@ func main() {
 	// Helper for resilient proxying
 	proxyWithResilience := func(c *fiber.Ctx, url string, breaker *gobreaker.CircuitBreaker) error {
 		_, err := breaker.Execute(func() (interface{}, error) {
+			// Inject tracing headers before proxying
+			logging.InjectTraceToFastHTTP(c.UserContext(), &c.Request().Header)
+
 			if err := proxy.Do(c, url); err != nil {
 				return nil, err
 			}
@@ -99,6 +113,10 @@ func main() {
 		// Rewrite /v1/... to /api/...
 		// e.g., /v1/merchants -> /api/merchants
 		newPath := "/api" + path[3:]
+		
+		// Inject tracing headers
+		logging.InjectTraceToFastHTTP(c.UserContext(), &c.Request().Header)
+		
 		return proxy.Do(c, merchantServiceURL+newPath)
 	})
 
